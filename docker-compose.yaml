@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  redis:
+    image: redis
+    container_name: redis-auto-corrections
+    environment:
+      - REDIS_PASSWORD=growdev2022
+    ports:
+      - 6379:6379
+    networks:
+      - autocorrections
+
+networks:
+  autocorrections:
+    driver: bridge
+
