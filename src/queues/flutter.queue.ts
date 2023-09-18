@@ -11,7 +11,14 @@ async function _action(job: Job<any>, done: DoneCallback) {
     log('Flutter - Running', new Date());
 
     const run = utils.promisify(childProcess.exec);
+
+    // Open Emulator
+    run(path.join(__dirname, '../scripts/open_emulator.sh'));
+
     await run(path.join(__dirname, '../scripts/automacao_flutter.sh'));
+
+    // Close Emulator
+    await run(path.join(__dirname, '../scripts/close_emulator.sh'));
 
     log('Flutter - Done', new Date());
     done();
