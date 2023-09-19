@@ -1,5 +1,6 @@
 import Queue, { DoneCallback, Job, JobOptions } from 'bull';
 import { flutter, sql } from './queues/';
+import 'dotenv/config';
 
 export interface QueueType<T> {
   name: string;

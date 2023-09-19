@@ -4,8 +4,7 @@ services:
   redis:
     image: redis
     container_name: redis-auto-corrections
-    environment:
-      - REDIS_PASSWORD=growdev2022
+    command: redis-server --requirepass growdev2022
     ports:
       - 6379:6379
     networks:
