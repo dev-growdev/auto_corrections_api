@@ -13,14 +13,15 @@ export class QueueController {
   static init() {
     this.registerQueues();
 
-    this.initQueue('sql', {
-      repeat: {
-        cron: '*/5 * * * *', // At every 5th minute.
-      },
-    });
+    // this.initQueue('sql', {
+    //   repeat: {
+    //     cron: '*/5 * * * *', // At every 5th minute.
+    //   },
+    // });
 
     this.initQueue('flutter', {
       repeat: {
+        limit: 1,
         cron: '* * * * *', // At every minute
       },
     });
