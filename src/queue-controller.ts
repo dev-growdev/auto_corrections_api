@@ -1,29 +1,44 @@
 import Queue, { DoneCallback, Job, JobOptions } from 'bull';
-import { flutter, sql } from './queues/';
+import { FlutterJob } from './jobs/flutter.job';
 import 'dotenv/config';
 
-export interface QueueType<T> {
+class MyQueue {
   name: string;
-  action: (job: Job<T>, done: DoneCallback) => void;
-  queue?: Queue.Queue<T>;
+  action: () => Promise<void>;
+  queue?: Queue.Queue;
+
+  constructor(name: string, action: () => Promise<void>) {
+    this.name = name;
+    this.action = action;
+    this.exec = this.exec.bind(this);
+  }
+
+  exec = async (_: Job, done: DoneCallback) => {
+    try {
+      console.log(`${this.name} - Running`, new Date());
+      await this.action();
+      console.log(`${this.name} - Done`, new Date());
+      done();
+    } catch (error: any) {
+      console.log(`${this.name} - Error`, error);
+      done(error);
+    }
+  };
 }
 
 export class QueueController {
-  static readonly queues: QueueType<any>[] = [flutter, sql];
+  static readonly queues: MyQueue[] = [
+    new MyQueue('flutter', FlutterJob.execute),
+  ];
 
   static init() {
     this.registerQueues();
 
-    // this.initQueue('sql', {
-    //   repeat: {
-    //     cron: '*/5 * * * *', // At every 5th minute.
-    //   },
-    // });
-
     this.initQueue('flutter', {
       repeat: {
-        limit: 1,
-        cron: '* * * * *', // At every minute
+        cron: '0 8 * * *', // every day 8am
+        // limit: 1,
+        // every: 1000 * 60,
       },
     });
   }
@@ -40,12 +55,12 @@ export class QueueController {
   }
 
   private static registerQueues() {
-    this.queues.forEach((queueType) => {
-      const queue = new Queue(queueType.name, process.env.REDIS_URL as string);
+    this.queues.forEach((myQueue) => {
+      const queue = new Queue(myQueue.name, process.env.REDIS_URL as string);
 
-      queue.process(queueType.action);
+      queue.process(myQueue.exec);
 
-      queueType.queue = queue;
+      myQueue.queue = queue;
     });
   }
 }

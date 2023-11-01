@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev --trace-warnings --respawn --transpile-only ./src/index.ts"
+    "dev": "ts-node-dev --trace-warnings --respawn --transpile-only ./src/index.ts",
+    "exec:job": "ts-node-dev ./src/jobs/exec.ts"
   },
   "dependencies": {
     "@types/node": "^20.6.0",
