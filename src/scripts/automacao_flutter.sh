@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# JSON 
-
 echo "Aguardando Emulador $(date)" >> log.txt
 
 sleep 200 # Aguarda iniciar o emulador
@@ -22,7 +20,7 @@ if [ "$num_objects" != 0 ]; then
 	total_objects=$((num_objects-1))
 	while [ $contador -le $total_objects ]
 	do
-	data=$(echo "$api" | jq -r '.data['$contador'] | {uid:.uid, github:.github, classSubjectAssessmentUid:.classSubjectAssessmentUid, studentUid:.studentUid, flutterVersion:.flutterVersion}')
+	data=$(echo "$api" | jq -r '.data['$contador'] | {uid:.uid, github:.payload.github, classSubjectAssessmentUid:.classSubjectAssessmentUid, studentUid:.studentUid, flutterVersion:.payload.flutterVersion}')
 		for item in "$data"
 		do
 
@@ -31,6 +29,8 @@ if [ "$num_objects" != 0 ]; then
 			classUid=$(echo "$item" | jq -r '.classSubjectAssessmentUid')
 			student=$(echo "$item" | jq -r '.studentUid')
 			flutterVersion=$(echo "$item" | jq -r '.flutterVersion')
+
+			echo "Incia Correção $(date) - $uid" >> log.txt
 		
 			#validação da url do github 
 			response=$(curl -sL -o /dev/null -w "%{http_code}" "$github")
@@ -59,9 +59,9 @@ if [ "$num_objects" != 0 ]; then
 				sed -i '/dev_dependencies:/a \ \ \integration_test:' pubspec.yaml 
 				sed -i '/integration_test:/a \ \ \ \ sdk: flutter' pubspec.yaml 
 				
-				#comandos para trocar o uid da correcao e url do academy no json.dart
-				sed -i "s/TROCANOSHUID/$uid/g" integration_test/json.dart
-				sed -i "s/GROWACADEMYAPIURL/$growacademyApi/g" integration_test/json.dart
+				#comandos para trocar o uid da correcao e url do academy no send_test_result.dart
+				sed -i "s/TROCANOSHUID/$uid/g" integration_test/send_test_result.dart
+				sed -i "s/GROWACADEMYAPIURL/$growacademyApi/g" integration_test/send_test_result.dart
 
 				#comando para instalar as dependencias
 				# Windows
@@ -82,14 +82,16 @@ if [ "$num_objects" != 0 ]; then
 
 				#Fecha o emulador
 				adb emu kill
+
 			else
-				echo "A URL do GitHub está incorreta." >> log.txt
+				echo "$uid - A URL do GitHub está incorreta." >> log.txt
 				# url="$growacademyApi/auto-corrections/$uid"
 
 				# json='{"score": "0"}' #valor 0 pois o github não está correto
 
 				# curl -X PUT -H "Content-Type: application/json" -d "$json" "$url"
 			fi
+			echo "Finaliza Correção $(date) - $uid" >> log.txt
 			
 		done
 		contador=$((contador+1))
