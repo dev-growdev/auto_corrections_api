@@ -3,14 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
 import '../lib/main.dart' as app;
-import 'json.dart';
+import 'send_test_result.dart';
 
 void main() {
   final List<TestResult> results = [];
 
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   tearDown(() async => await Future.delayed(Duration(seconds: 2)));
-  tearDownAll(() => enviarDadosComoJson(results));
+  tearDownAll(() => enviaResultados(results));
   group('end-to-end test', () {
     testWidgets('Validação do componente imagem', (tester) async {
       results.add(

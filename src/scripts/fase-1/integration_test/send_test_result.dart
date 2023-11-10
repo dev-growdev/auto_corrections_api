@@ -20,7 +20,7 @@ class TestResult {
       };
 }
 
-void enviarDadosComoJson(List<TestResult> testResults) async {
+void enviaResultados(List<TestResult> testResults) async {
   var url = Uri.parse('$growacademyApiUrl/auto-corrections/$uid');
 
   Map<String, dynamic> data = {
