@@ -7,16 +7,16 @@ var growacademyApiUrl = 'GROWACADEMYAPIURL';
 
 class TestResult {
   String title;
-  bool aproved;
+  bool approved;
 
   TestResult({
     required this.title,
-    required this.aproved,
+    required this.approved,
   });
 
   Map<String, dynamic> toMap() => {
         'title': title,
-        'aproved': aproved,
+        'approved': approved,
       };
 }
 
