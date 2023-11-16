@@ -1,10 +1,6 @@
 #!/bin/bash
 
-echo "Aguardando Emulador $(date)" >> log.txt
-
-sleep 200 # Aguarda iniciar o emulador
-
-echo "Iniciado Script $(date)" >> log.txt
+echo -e "$(date) \t-\t Iniciado Script" >> log.txt
 
 growacademyApi=$1
 subjectUid=$2
@@ -29,14 +25,30 @@ if [ "$num_objects" != 0 ]; then
 			classUid=$(echo "$item" | jq -r '.classSubjectAssessmentUid')
 			student=$(echo "$item" | jq -r '.studentUid')
 			flutterVersion=$(echo "$item" | jq -r '.flutterVersion')
+			# Pega somente os primeiros digitos da versão
+			flutterVersion=$(echo "$flutterVersion" | cut -d'.' -f1,2)
 
-			echo "Incia Correção $(date) - $uid" >> log.txt
+			echo -e "$(date) \t-\t $uid \t-\t Inicia Correção" >> log.txt
 		
 			#validação da url do github 
 			response=$(curl -sL -o /dev/null -w "%{http_code}" "$github")
 
 			# Verifica o código de resposta
 			if [ "$response" -eq 200 ]; then
+				
+				echo -e "$(date) \t-\t $uid \t-\t Aguardando Emulator" >> log.txt
+			
+				# sh ./src/scripts/open_emulator.sh &
+				# Abre o emulador
+				# Windows
+				# cd ~/AppData/Local/Android/sdk/emulator; ./emulator -avd Pixel_4_XL_API_31 -wipe-data -no-cache -no-boot-anim -no-snapshot -logcat '*:s' &
+
+				# Linux
+				~/Android/Sdk/emulator/emulator -avd Pixel_6a_API_31 -wipe-data -no-cache -no-boot-anim -no-snapshot -logcat '*:s' &
+
+				sleep 90 #Aguarda iniciar o emulador
+
+				echo -e "$(date) \t-\t $uid \t-\t Emulador Iniciado" >> log.txt
 
 				#criar uma pasta projeto
 				mkdir projetos
@@ -61,7 +73,9 @@ if [ "$num_objects" != 0 ]; then
 				
 				#comandos para trocar o uid da correcao e url do academy no send_test_result.dart
 				sed -i "s/TROCANOSHUID/$uid/g" integration_test/send_test_result.dart
-				sed -i "s/GROWACADEMYAPIURL/$growacademyApi/g" integration_test/send_test_result.dart
+				sed -i "s;GROWACADEMYAPIURL;$growacademyApi;g" integration_test/send_test_result.dart
+
+				~/src/$flutterVersion/bin/cache/dart-sdk/bin/dart pub cache clean -f
 
 				#comando para instalar as dependencias
 				# Windows
@@ -82,24 +96,25 @@ if [ "$num_objects" != 0 ]; then
 
 				#Fecha o emulador
 				adb emu kill
-
+				#Aguarda fechar o emulador
+				sleep 25
 			else
-				echo "$uid - A URL do GitHub está incorreta." >> log.txt
+				echo -e "$(date) \t-\t $uid \t-\t A URL do Github está inválida" >> log.txt
 				# url="$growacademyApi/auto-corrections/$uid"
 
 				# json='{"score": "0"}' #valor 0 pois o github não está correto
 
 				# curl -X PUT -H "Content-Type: application/json" -d "$json" "$url"
 			fi
-			echo "Finaliza Correção $(date) - $uid" >> log.txt
+			echo -e "$(date) \t-\t $uid \t-\t Correção Finalizada" >> log.txt
 			
 		done
 		contador=$((contador+1))
 	done
 
 else 
-	echo "Nenhum Registro Encontrado $(date)" >> log.txt
+	echo -e "$(date) \t-\t Nenhuma correção encontrada" >> log.txt
 fi
 
-echo "Fim Script $(date)" >> log.txt
+echo -e "$(date) \t-\t $uid \t-\t Script Finalizado" >> log.txt
 
