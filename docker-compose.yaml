@@ -1,6 +1,22 @@
 version: '3'
 
 services:
+  db:
+    image: postgres
+    restart: always
+    container_name: postgres-auto-corrections
+    environment:
+      POSTGRES_PASSWORD: growdev2022
+      POSTGRES_USER: growdev
+      POSTGRES_DB: autocorrections
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - 5435:5432
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - autocorrections
+
   redis:
     image: redis
     container_name: redis-auto-corrections
@@ -14,3 +30,5 @@ networks:
   autocorrections:
     driver: bridge
 
+volumes:
+  postgres:
