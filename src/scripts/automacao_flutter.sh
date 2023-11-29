@@ -1,10 +1,11 @@
 #!/bin/bash
 
-echo -e "$(date) \t-\t Iniciado Script" >> log.txt
+echo -e "$(date) \t-\t Iniciando Script" >> log.txt
 
 growacademyApi=$1
 subjectUid=$2
 classUid=$3
+subjectFolder=$4
 
 contador=0
 url="$growacademyApi/auto-corrections?subjectUid=$subjectUid&classUid=$classUid"
@@ -38,7 +39,6 @@ if [ "$num_objects" != 0 ]; then
 				
 				echo -e "$(date) \t-\t $uid \t-\t Aguardando Emulator" >> log.txt
 			
-				# sh ./src/scripts/open_emulator.sh &
 				# Abre o emulador
 				# Windows
 				# cd ~/AppData/Local/Android/sdk/emulator; ./emulator -avd Pixel_4_XL_API_31 -wipe-data -no-cache -no-boot-anim -no-snapshot -logcat '*:s' &
@@ -63,11 +63,11 @@ if [ "$num_objects" != 0 ]; then
 				cd */
 
 				#comandos para adicionar a pasta dos testes
-				cp -r ../../src/scripts/fase-1/* ./ #definir o caminho na maquina local
+				cp -r ../../src/scripts/$subjectFolder/* ./ #definir o caminho na maquina local
 
 
 				#comandos para adicionar as dependencias no pubspec
-				sed -i '/^dependencies:/a \ \ \http: ^0.13.6' pubspec.yaml 
+				sed -i '/^dependencies:/a \ \ \http:' pubspec.yaml 
 				sed -i '/dev_dependencies:/a \ \ \integration_test:' pubspec.yaml 
 				sed -i '/integration_test:/a \ \ \ \ sdk: flutter' pubspec.yaml 
 				
