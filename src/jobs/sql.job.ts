@@ -38,25 +38,21 @@ export class SQLJob {
       this.log(`SQLJob \t-\t Inicia Fase 2`);
       await this.getAutoCorrectionsPerStep(
         '3a231abf-d826-4e46-a2c0-e030822f11f8',
-        (autoCorrection) => this.correctFirtStep(autoCorrection)
+        (autoCorrection) => this.correctSecondStep(autoCorrection)
       );
 
       // // Fase 03
       // this.log(`SQLJob \t-\t Inicia Fase 3`);
       // await this.getAutoCorrectionsPerStep(
       //   '9ad73459-d5a8-42ec-9d5f-b50c7a91b37e',
-      //   async (autoCorrection) => {
-      //     return [];
-      //   }
+      //   (autoCorrection) => this.correctThirdStep(autoCorrection)
       // );
 
       // // Fase 04
       // this.log(`SQLJob \t-\t Inicia Fase 4`);
       // await this.getAutoCorrectionsPerStep(
       //   'c524e2c7-eed1-42ef-9c6a-86a6fdee608b',
-      //   async (autoCorrection) => {
-      //     return [];
-      //   }
+      //   (autoCorrection) => this.correctFourthStep(autoCorrection)
       // );
     } catch (e) {
       this.log(`SQLJob \t-\t Error ao executar fases: ${error}`);
@@ -104,7 +100,8 @@ export class SQLJob {
     }
   }
 
-  private static async correctFirtStep(
+  // Fase 2
+  private static async correctSecondStep(
     autoCorrection: AutoCorrection
   ): Promise<AutoCorrectionResultDTO[]> {
     const script1 = autoCorrection.payload[0];
@@ -131,6 +128,26 @@ export class SQLJob {
     return results;
   }
 
+  // Fase 3
+  private static async correctThirdStep(
+    autoCorrection: AutoCorrection
+  ): Promise<AutoCorrectionResultDTO[]> {
+    // TODO: Fazer correção fase 3 SQL
+    const results: AutoCorrectionResultDTO[] = [];
+
+    return results;
+  }
+
+  // Fase 4
+  private static async correctFourthStep(
+    autoCorrection: AutoCorrection
+  ): Promise<AutoCorrectionResultDTO[]> {
+    // TODO: Fazer correção fase 4 SQL
+    const results: AutoCorrectionResultDTO[] = [];
+
+    return results;
+  }
+
   private static async runCreateTableScript(
     script: string
   ): Promise<RunScriptResult> {
@@ -144,12 +161,18 @@ export class SQLJob {
 
       const queryResult = await pgHelper.client.query(script);
 
-      const autoCorrectionResult = { title: 'Create Table', approved: true };
+      const autoCorrectionResult = {
+        title: 'Validação do script de criação de tabela',
+        approved: true,
+      };
 
       return { autoCorrectionResult, queryResult };
     } catch (error) {
       this.log(`SQLJob \t-\t runCreateTableScript Error: ${error}`);
-      const autoCorrectionResult = { title: 'Create Table', approved: false };
+      const autoCorrectionResult = {
+        title: 'Validação do script de criação de tabela',
+        approved: false,
+      };
       return { autoCorrectionResult };
     }
   }
@@ -162,12 +185,18 @@ export class SQLJob {
 
       const isValid = (queryResult.rowCount ?? 0) > 0;
 
-      const autoCorrectionResult = { title: 'Insert Data', approved: isValid };
+      const autoCorrectionResult = {
+        title: 'Validação do script de inserção dos dados',
+        approved: isValid,
+      };
 
       return { autoCorrectionResult, queryResult };
     } catch (error) {
       this.log(`SQLJob \t-\t runInsertScript Error: ${error}`);
-      const autoCorrectionResult = { title: 'Insert Data', approved: false };
+      const autoCorrectionResult = {
+        title: 'Validação do script de inserção dos dados',
+        approved: false,
+      };
       return { autoCorrectionResult };
     }
   }
@@ -181,12 +210,18 @@ export class SQLJob {
 
       const isValid = (queryResult.rowCount ?? 0) >= rowCountToValid;
 
-      const autoCorrectionResult = { title: 'Select Data', approved: isValid };
+      const autoCorrectionResult = {
+        title: 'Validação de script de busca dos dados',
+        approved: isValid,
+      };
 
       return { autoCorrectionResult, queryResult };
     } catch (error) {
       this.log(`SQLJob \t-\t runSelectScript Error: ${error}`);
-      const autoCorrectionResult = { title: 'Select Data', approved: false };
+      const autoCorrectionResult = {
+        title: 'Validação de script de busca dos dados',
+        approved: false,
+      };
       return { autoCorrectionResult };
     }
   }
@@ -199,12 +234,18 @@ export class SQLJob {
 
       const isValid = (queryResult.rowCount ?? 0) > 0;
 
-      const autoCorrectionResult = { title: 'Update Table', approved: isValid };
+      const autoCorrectionResult = {
+        title: 'Validação do script de atualização dos dados',
+        approved: isValid,
+      };
 
       return { autoCorrectionResult, queryResult };
     } catch (error) {
       this.log(`SQLJob \t-\t runUpdateScript Error: ${error}`);
-      const autoCorrectionResult = { title: 'Update Table', approved: false };
+      const autoCorrectionResult = {
+        title: 'Validação do script de atualização dos dados',
+        approved: false,
+      };
       return { autoCorrectionResult };
     }
   }
