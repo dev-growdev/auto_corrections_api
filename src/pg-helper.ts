@@ -10,6 +10,7 @@ export const pgHelper = {
     await this.client.connect();
   },
   async disconnect(): Promise<void> {
+    if(this.client == null) return;
     await this.client.end();
     this.client = null as any;
   },
