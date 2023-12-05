@@ -12,8 +12,7 @@ void main() {
 
   tearDown(() async => await Future.delayed(const Duration(seconds: 1)));
 
-  // tearDownAll(() => enviaResultados(results));
-  tearDownAll(() => print(results));
+  tearDownAll(() => enviaResultados(results));
 
   group('end-to-end test', () {
     testWidgets('Validação do componente imagem', (tester) async {

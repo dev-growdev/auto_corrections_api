@@ -16,7 +16,7 @@ void main() {
     GetIt.I.reset();
   });
 
-  // tearDownAll(() => enviaResultados(results));
+  tearDownAll(() => enviaResultados(results));
 
   group('end-to-end test', () {
     testWidgets('Validação da lupa da barra de pesquisa', (tester) async {

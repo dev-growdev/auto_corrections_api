@@ -12,7 +12,7 @@ void main() {
 
   tearDown(() async => await Future.delayed(const Duration(seconds: 1)));
 
-  // tearDownAll(() => enviaResultados(results));
+  tearDownAll(() => enviaResultados(results));
 
   group('end-to-end test', () {
     testWidgets('Validação do título da tela inicial', (tester) async {

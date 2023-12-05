@@ -19,7 +19,7 @@ void main() {
     Hive.resetAdapters();
   });
 
-  // tearDownAll(() => enviaResultados(results));
+  tearDownAll(() => enviaResultados(results));
 
   group('end-to-end test', () {
     testWidgets('Validação da tela principal sem decks cadastrados',
