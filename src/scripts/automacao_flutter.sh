@@ -1,11 +1,11 @@
 #!/bin/bash
 
-echo -e "$(date) \t-\t Iniciando Script" >> log.txt
-
 growacademyApi=$1
 subjectUid=$2
 classUid=$3
 subjectFolder=$4
+
+echo -e "$(date) \t-\t $subjectFolder \t-\t Iniciando Script" >> logs/flutter/script_log.txt
 
 contador=0
 url="$growacademyApi/auto-corrections?subjectUid=$subjectUid&classUid=$classUid"
@@ -29,7 +29,8 @@ if [ "$num_objects" != 0 ]; then
 			# Pega somente os primeiros digitos da versão
 			flutterVersion=$(echo "$flutterVersion" | cut -d'.' -f1,2)
 
-			echo -e "$(date) \t-\t $uid \t-\t Inicia Correção" >> log.txt
+			echo -e "$(date) \t-\t $uid \t-\t Inicia Correção" >> logs/flutter/script_log.txt
+			echo -e "$(date) \t-\t Flutter $flutterVersion" >> logs/flutter/script_log.txt
 		
 			#validação da url do github 
 			response=$(curl -sL -o /dev/null -w "%{http_code}" "$github")
@@ -37,7 +38,7 @@ if [ "$num_objects" != 0 ]; then
 			# Verifica o código de resposta
 			if [ "$response" -eq 200 ]; then
 				
-				echo -e "$(date) \t-\t $uid \t-\t Aguardando Emulator" >> log.txt
+				echo -e "$(date) \t-\t $uid \t-\t Aguardando Emulator" >> logs/flutter/script_log.txt
 			
 				# Abre o emulador
 				# Windows
@@ -46,9 +47,9 @@ if [ "$num_objects" != 0 ]; then
 				# Linux
 				~/Android/Sdk/emulator/emulator -avd Pixel_6a_API_31 -wipe-data -no-cache -no-boot-anim -no-snapshot -logcat '*:s' &
 
-				sleep 90 #Aguarda iniciar o emulador
+				sleep 120 #Aguarda iniciar o emulador
 
-				echo -e "$(date) \t-\t $uid \t-\t Emulador Iniciado" >> log.txt
+				echo -e "$(date) \t-\t $uid \t-\t Emulador Iniciado" >> logs/flutter/script_log.txt
 
 				#criar uma pasta projeto
 				mkdir projetos
@@ -87,7 +88,7 @@ if [ "$num_objects" != 0 ]; then
 				# Windows
 				# c:/src/$flutterVersion/bin/flutter test integration_test/app_test.dart
 				# Linux
-				~/src/$flutterVersion/bin/flutter test integration_test/app_test.dart
+				~/src/$flutterVersion/bin/flutter test integration_test/app_test.dart | tee -a ../../logs/flutter/$uid.txt
 				sleep 2
 
 				#deletar a pasta clonada
@@ -99,22 +100,22 @@ if [ "$num_objects" != 0 ]; then
 				#Aguarda fechar o emulador
 				sleep 25
 			else
-				echo -e "$(date) \t-\t $uid \t-\t A URL do Github está inválida" >> log.txt
+				echo -e "$(date) \t-\t $uid \t-\t A URL do Github está inválida" >> logs/flutter/script_log.txt
 				# url="$growacademyApi/auto-corrections/$uid"
 
 				# json='{"score": "0"}' #valor 0 pois o github não está correto
 
 				# curl -X PUT -H "Content-Type: application/json" -d "$json" "$url"
 			fi
-			echo -e "$(date) \t-\t $uid \t-\t Correção Finalizada" >> log.txt
+			echo -e "$(date) \t-\t $uid \t-\t Correção Finalizada" >> logs/flutter/script_log.txt
 			
 		done
 		contador=$((contador+1))
 	done
 
 else 
-	echo -e "$(date) \t-\t Nenhuma correção encontrada" >> log.txt
+	echo -e "$(date) \t-\t Nenhuma correção encontrada" >> logs/flutter/script_log.txt
 fi
 
-echo -e "$(date) \t-\t $uid \t-\t Script Finalizado" >> log.txt
+echo -e "$(date) \t-\t $uid \t-\t Script Finalizado" >> logs/flutter/script_log.txt
 

@@ -39,5 +39,6 @@ void enviaResultados(List<TestResult> testResults) async {
     print(jsonData);
   } else {
     print('Falha ao enviar o put. Código de status: ${response.statusCode}');
+    print('Falha ao enviar o put. Response Body: ${response.body}');
   }
 }

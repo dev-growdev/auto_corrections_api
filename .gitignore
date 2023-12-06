@@ -4,4 +4,4 @@ node_modules/
 log.txt
 logSQL.txt
 output_test.txt
-logs/*
+logs/flutter/*
