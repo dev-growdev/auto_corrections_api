@@ -1,6 +1,7 @@
 import Queue, { DoneCallback, Job, JobOptions } from 'bull';
 import { FlutterJob } from './jobs/flutter.job';
 import 'dotenv/config';
+import { SQLJob } from './jobs/sql.job';
 
 class MyQueue {
   name: string;
@@ -28,11 +29,20 @@ class MyQueue {
 
 export class QueueController {
   static readonly queues: MyQueue[] = [
+    new MyQueue('sql', SQLJob.execute),
     new MyQueue('flutter', FlutterJob.execute),
   ];
 
   static init() {
     this.registerQueues();
+
+    this.initQueue('sql', {
+      repeat: {
+        cron: '0 8 * * *', // every day 8am
+        // limit: 1,
+        // every: 1000 * 60,
+      },
+    });
 
     this.initQueue('flutter', {
       repeat: {
