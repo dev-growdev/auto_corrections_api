@@ -450,6 +450,17 @@ export class SQLJob {
   }
 
   private static async clearInitialData(): Promise<void> {
+
+    const dropTableViewAssociationReservationResult =
+      await this.runCreateTableScript({
+        title: 'Excluir view vw_reserva_associado',
+        script: `DROP VIEW IF EXISTS vw_reserva_associado;`,
+      });
+
+    if (!dropTableViewAssociationReservationResult.autoCorrectionResult.approved) {
+      throw new Error('Erro ao excluir a view vw_reserva_eassociado');
+    }
+
     const dropTableEquipamentReservationResult =
       await this.runCreateTableScript({
         title: 'Excluir tabela reserva_equipamento',
