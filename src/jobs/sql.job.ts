@@ -30,35 +30,35 @@ interface RunScriptResult {
 export class SQLJob {
   static async execute(): Promise<void> {
     try {
-      this.log('SQLJob \t-\t Iniciando');
+      // this.log('SQLJob \t-\t Iniciando');
 
       await pgHelper.connect();
 
       // Fase 02
-      this.log(`SQLJob \t-\t Inicia Fase 2`);
+      // this.log(`SQLJob \t-\t Inicia Fase 2`);
       await this.getAutoCorrectionsPerStep(
         '3a231abf-d826-4e46-a2c0-e030822f11f8',
         (autoCorrection) => this.correctSecondStep(autoCorrection)
       );
 
       // Fase 03
-      this.log(`SQLJob \t-\t Inicia Fase 3`);
+      // this.log(`SQLJob \t-\t Inicia Fase 3`);
       await this.getAutoCorrectionsPerStep(
         '9ad73459-d5a8-42ec-9d5f-b50c7a91b37e',
         (autoCorrection) => this.correctThirdStep(autoCorrection)
       );
 
       // Fase 04
-      this.log(`SQLJob \t-\t Inicia Fase 4`);
+      // this.log(`SQLJob \t-\t Inicia Fase 4`);
       await this.getAutoCorrectionsPerStep(
         'c524e2c7-eed1-42ef-9c6a-86a6fdee608b',
         (autoCorrection) => this.correctFourthStep(autoCorrection)
       );
     } catch (e) {
-      this.log(`SQLJob \t-\t Error ao executar fases: ${error}`);
+      // this.log(`SQLJob \t-\t Error ao executar fases: ${error}`);
     } finally {
       await pgHelper.disconnect();
-      this.log('SQLJob \t-\t Finalizou');
+      // this.log('SQLJob \t-\t Finalizou');
     }
   }
 
@@ -80,23 +80,23 @@ export class SQLJob {
       if (response.data.data.length) {
         // Percorre cada e executa a correção, ao final atualiza com o resultado
         for (const autoCorrection of response.data.data as AutoCorrection[]) {
-          this.log(`SQLJob \t-\t ${autoCorrection.uid} \t-\t Inicia correção`);
+          // this.log(`SQLJob \t-\t ${autoCorrection.uid} \t-\t Inicia correção`);
           const results = await execCorrection(autoCorrection);
-          console.log(`RESULTADOS ${subjectUid}`, results);
+          // console.log(`RESULTADOS ${subjectUid}`, results);
 
           await axios.put(
             `${growacademyApi}/auto-corrections/${autoCorrection.uid}`,
             { results }
           );
-          this.log(
-            `SQLJob \t-\t ${autoCorrection.uid} \t-\t Finaliza correção`
-          );
+          // this.log(
+          //   `SQLJob \t-\t ${autoCorrection.uid} \t-\t Finaliza correção`
+          // );
         }
       }
     } catch (error: any) {
-      this.log(
-        `SQLJob \t-\t getAutoCorrectionsPerStep Error: ${error?.message}`
-      );
+      // this.log(
+      //   `SQLJob \t-\t getAutoCorrectionsPerStep Error: ${error?.message}`
+      // );
     }
   }
 
@@ -130,7 +130,7 @@ export class SQLJob {
 
       results.push(selectResult.autoCorrectionResult);
     } catch (error) {
-      this.log(`SQLJob \t-\t correctFirtStep Error: ${error}`);
+      // this.log(`SQLJob \t-\t correctFirtStep Error: ${error}`);
     }
 
     return results;
@@ -149,6 +149,7 @@ export class SQLJob {
     try {
       await this.clearInitialData();
       await this.createInitialData();
+      console.log(script1)
 
       const createTableResult = await this.runCreateTableScript({
         title: 'Validação script criar tabela MENSALIDADE',
@@ -176,7 +177,7 @@ export class SQLJob {
       results.push(selectResult.autoCorrectionResult);
       await this.clearInitialData();
     } catch (error) {
-      this.log(`SQLJob \t-\t correctFirtStep Error: ${error}`);
+      // this.log(`SQLJob \t-\t correctFirtStep Error: ${error}`);
     }
 
     return results;
@@ -191,6 +192,7 @@ export class SQLJob {
     const script3 = autoCorrection.payload[2];
     const results: AutoCorrectionResultDTO[] = [];
 
+
     try {
       await this.clearInitialData();
       await this.createInitialData();
@@ -199,6 +201,7 @@ export class SQLJob {
         title: 'Validação script inserir dados na tabela RESERVA_EQUIPAMENTO',
         script: script1.value,
       });
+      // console.log('result insert ',insertResult)
       results.push(insertResult.autoCorrectionResult);
 
       const createView = await this.runSelectScript({
@@ -217,7 +220,8 @@ export class SQLJob {
       results.push(selectResult.autoCorrectionResult);
       await this.clearInitialData();
     } catch (error) {
-      this.log(`SQLJob \t-\t correctFirtStep Error: ${error}`);
+      console.log(error);
+      // this.log(`SQLJob \t-\t correctFirtStep Error: ${error}`);
     }
 
     return results;
@@ -245,11 +249,12 @@ export class SQLJob {
 
       return { autoCorrectionResult, queryResult };
     } catch (error) {
-      this.log(`SQLJob \t-\t runCreateTableScript Error: ${error}`);
+      // this.log(`SQLJob \t-\t runCreateTableScript Error: ${error}`);
       const autoCorrectionResult = {
         title: title,
         approved: false,
       };
+      console.log(error)
       return { autoCorrectionResult };
     }
   }
@@ -272,7 +277,7 @@ export class SQLJob {
 
       return { autoCorrectionResult, queryResult };
     } catch (error) {
-      this.log(`SQLJob \t-\t runInsertScript Error: ${error}`);
+      // this.log(`SQLJob \t-\t runInsertScript Error: ${error}`);
       const autoCorrectionResult = {
         title: title,
         approved: false,
@@ -299,7 +304,7 @@ export class SQLJob {
 
       return { autoCorrectionResult, queryResult };
     } catch (error) {
-      this.log(`SQLJob \t-\t runSelectScript Error: ${error}`);
+      // this.log(`SQLJob \t-\t runSelectScript Error: ${error}`);
       const autoCorrectionResult = {
         title: title,
         approved: false,
@@ -325,7 +330,7 @@ export class SQLJob {
 
       return { autoCorrectionResult, queryResult };
     } catch (error) {
-      this.log(`SQLJob \t-\t runUpdateScript Error: ${error}`);
+      // this.log(`SQLJob \t-\t runUpdateScript Error: ${error}`);
       const autoCorrectionResult = {
         title: title,
         approved: false,
@@ -478,6 +483,16 @@ export class SQLJob {
 
     if (!dropTableEquipmentResult.autoCorrectionResult.approved) {
       throw new Error('Erro ao excluir tabela equipamento');
+    }
+
+    const dropTableMensalidadeResult =
+      await this.runCreateTableScript({
+        title: 'Excluir tabela mensalidade',
+        script: `DROP TABLE IF EXISTS mensalidade;`,
+      });
+
+    if (!dropTableMensalidadeResult.autoCorrectionResult.approved) {
+      throw new Error('Erro ao excluir tabela mensalidade');
     }
 
     const dropTableEnrollmentResult = await this.runCreateTableScript({
