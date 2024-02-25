@@ -142,13 +142,14 @@ export class SQLJob {
           title: 'Validação script inserir dados PERGUNTAS_RESPOSTAS',
           approved: false,
         };
+
         let rowCountInsert = 0;
         try {
           const queryResult = await pgHelper.client.query(script);
-          autoCorrectionResult.approved = (queryResult.rowCount ?? 0) > 0;
-          rowCountInsert = queryResult.rowCount ?? 0
-        } catch (error) {
-          this.log(`SQLJob \t-\t Erro ao executar o segundo script - Error: ${error}`);
+          autoCorrectionResult.approved = ((queryResult.rowCount ?? 0) || (queryResult as any as QueryResult[]).length) > 0;
+          rowCountInsert = (queryResult.rowCount ?? 0) || (queryResult as any as QueryResult[]).length
+        } catch (error: any) {
+          this.log(`SQLJob \t-\t Erro ao executar o segundo script - Error: ${error?.stack}`);
         }
         return { autoCorrectionResult, rowCountInsert };
       }
