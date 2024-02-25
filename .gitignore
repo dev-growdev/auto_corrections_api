@@ -5,4 +5,4 @@ log.txt
 logSQL.txt
 output_test.txt
 logs/flutter/*
-jobs/logs/*
+src/jobs/
