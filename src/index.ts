@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { QueueController } from './queue-controller';
+import { Jobs } from './jobs';
 
 const app = express();
 app.use(express.json());
@@ -10,6 +10,6 @@ app.get('/', (_: Request, res: Response) =>
 
 const port = process.env.PORT || 8081;
 
-app.listen(port, () => console.log('Server is running on port', port));
+new Jobs().init();
 
-QueueController.init();
+app.listen(port, () => console.log('Server is running on port', port));
