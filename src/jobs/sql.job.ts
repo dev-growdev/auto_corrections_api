@@ -297,8 +297,6 @@ export class SQLJob {
         try {
           const queryResult = await pgHelper.client.query(script);
 
-
-
           autoCorrectionResult.approved = ((queryResult.rowCount ?? 0) || (queryResult as any as QueryResult[]).length) > 0;
         } catch (error) {
           this.log(`SQLJob \t-\t Erro ao inserir dados na tabela MENSALIDADE - Error: ${error}`);
