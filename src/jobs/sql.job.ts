@@ -84,12 +84,18 @@ export class SQLJob {
         for (const autoCorrection of autoCorrections) {
           this.log(`SQLJob \t-\t ${autoCorrection.uid} \t-\t Inicia correção`);
 
-          const results = await execCorrection(autoCorrection);
+          try {
+            const results = await execCorrection(autoCorrection);
 
-          await axios.put(
-            `${growacademyApi}/auto-corrections/${autoCorrection.uid}`,
-            { results }
-          );
+            await axios.put(
+              `${growacademyApi}/auto-corrections/${autoCorrection.uid}`,
+              { results }
+            );
+          } catch (error: any) {
+            this.log(
+              `SQLJob \t-\t Erro ao atualizar a nota na API - Error: ${error?.message}`
+            );
+          }
 
           this.log(
             `SQLJob \t-\t ${autoCorrection.uid} \t-\t Finaliza correção`
@@ -97,9 +103,9 @@ export class SQLJob {
         }
       }
     } catch (error: any) {
-      // this.log(
-      //   `SQLJob \t-\t getAutoCorrectionsPerStep Error: ${error?.message}`
-      // );
+      this.log(
+        `SQLJob \t-\t Erro ao buscar as correçoes da API - Error: ${error?.message}`
+      );
     }
   }
 
