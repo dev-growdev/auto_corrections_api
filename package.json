@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev --trace-warnings --respawn --transpile-only ./src/index.ts",
-    "exec:job": "ts-node-dev ./src/jobs/exec.ts"
+    "exec:job": "ts-node-dev ./src/jobs/exec.ts",
+    "exec:extract": "ts-node-dev ./src/extract-sql.ts"
   },
   "dependencies": {
     "@types/node": "^20.6.0",
