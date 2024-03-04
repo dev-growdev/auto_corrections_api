@@ -165,6 +165,9 @@ export class SQLJob {
         try {
           const queryResult = await pgHelper.client.query(script);
 
+          console.log(rowCountInsert);
+          console.log(queryResult);
+
           if (rowCountInsert === 0) {
             autoCorrectionResult.approved = (queryResult.rowCount ?? 0) > 0
           } else {

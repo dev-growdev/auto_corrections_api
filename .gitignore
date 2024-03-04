@@ -6,3 +6,4 @@ logSQL.txt
 output_test.txt
 logs/flutter/*
 src/jobs/
+**/.DS_Store
