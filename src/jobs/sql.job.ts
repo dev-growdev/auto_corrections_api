@@ -135,6 +135,19 @@ export class SQLJob {
           const existResult = await pgHelper.client.query(`SELECT EXISTS(SELECT 1 FROM pg_tables WHERE tablename = 'perguntas_respostas' ) as table_exist;`)
           autoCorrectionResult.approved = existResult.rows[0].table_exist as boolean;
         } catch (error) {
+          try {
+            // apaga a tabela se existir
+            await pgHelper.client.query(`DROP TABLE IF EXISTS perguntas_respostas;`);
+
+            await pgHelper.client.query(`CREATE TABLE perguntas_respostas(
+              PERGUNTA varchar(1000),
+              RESPOSTA varchar(1000)
+            );`);
+
+          } catch (error) {
+            this.log(`SQLJob \t-\t Erro ao criar a tabela PERGUNTAS_RESPOSTAS para nao impactar os próximos scripts - Error: ${error}`);
+          }
+
           this.log(`SQLJob \t-\t Erro ao executar o primeiro script - Error: ${error}`);
         }
         return autoCorrectionResult;
@@ -155,6 +168,27 @@ export class SQLJob {
           autoCorrectionResult.approved = ((queryResult.rowCount ?? 0) || (queryResult as any as QueryResult[]).length) > 0;
           rowCountInsert = (queryResult.rowCount ?? 0) || (queryResult as any as QueryResult[]).length
         } catch (error: any) {
+          try {
+            // apaga qualquer registro se existir
+            await pgHelper.client.query(`DELETE FROM perguntas_respostas;`);
+
+            await pgHelper.client.query(`insert into perguntas_respostas(pergunta, resposta) values
+            ('Eu consido atuar no mercado com essa formação da Growdev?', 'Sim. Após você terminar os dois módulos desta formação (introdução à ciência de dados e o analista de dados) você estará apto para atuar no mercado.'),
+            ('Não tenho conhecimento na área de dados, essa formação é pra mim?', 'Esta formação busca te preparar para a área de analista de dados mesmo que você não tenha conhecimento nesta área. O programa conta com um módulo introdutório que ajuda a nivelar o conhecimento de todos(as) os(as) alunos(as).'),
+            ('Como serão as aulas, vou ter suporte de mentores?', 'Sim, os nossos mentores são profissionais que atuam no mercado e irão compartilhar a experiência deles nas aulas ao vivo.'),
+            ('Qual o papel do mentor?', 'O mentor será o mediador do seu conhecimento. Ele te ajudará a entender os conceitos que serão colocados em prática nas aulas. Através de uma metodologia que busca fazer com que o aluno pratique bastante sendo o protagonista da sua aprendizagem.'),
+            ('Se eu faltar alguma aula, consigo recuperar o conteúdo?', 'Sim, as aulas são gravadas para que você possa recuperar alguma aula perdida ou ainda rever conteúdos. Mas sua presença ao vivo é essencial para nossa metodologia e seu aprendizado.'),
+            ('Vou receber certificado em cada módulo?', 'Sim. Ao finalizar cada módulo você receberá um certificado que além de validar o conhecimento que você adquiriu até o momento, poderá ser utilizado como "horas complementares" na sua graduação.'),
+            ('Posso pagar depois de terminar a formação e quando estiver trabalhando?', 'Temos várias opções de investimento para esta formação, com e sem carência para começar a pagar, porém o ISA não está disponível.'),
+            ('A Growdev pode cancelar o meu contrato caso eu não realize o que foi acordado?', 'Sim, no contrato educacional existem regras para o sucesso do aluno. Logo se em algum momento você não seguir algo que esteja no contrato você poderá ser cancelado.'),
+            ('Quantas horas de dedicação eu preciso ter por semana?', 'Estima-se que o aluno, em média, precisará de 15h semanais para o desenvolvimento de suas atividades síncronas e assíncronas. Ressaltamos que a carga horária sugerida ao(à) aluno(a) está diretamente ligada à sua dedicação e, com o propósito de tratar todos(as) de forma igual. Sendo assim, este número pode variar de pessoa para pessoa, dado o background pré-existente de cada, a facilidade de aprendizado, organização, etc.'),
+            ('Requisitos que preciso ter?', 'Ter 18 anos; Ensino médio completo; Ter disponibilidade horários (Síncronos e Assíncronos): Aulas ao vivo nas sextas-feiras das 19h às 22h30min e alguns sábados das 8h às 11h30min (encontros síncronos); Infraestrutura: computador com 4g de memória ram, webcam, microfone e internet rápida. Comprometimento, dedicação e muita vontade de aprender!'),
+            ('Como funciona a plataforma de estudos?', 'Utilizamos o Classroom do Google como ambiente virtual de aprendizagem. Nele constam materiais complementares como: conteúdos, vídeos, atividades e desafios. Além disso, será por ele que você fará as entregas das atividades.');`);
+            rowCountInsert = 11;
+          } catch (error) {
+            this.log(`SQLJob \t-\t Erro ao inserir os dados na tabela PERGUNTAS_RESPOSTAS para nao impactar os próximos scripts - Error: ${error}`);
+          }
+
           this.log(`SQLJob \t-\t Erro ao executar o segundo script - Error: ${error?.stack}`);
         }
         return { autoCorrectionResult, rowCountInsert };
@@ -170,9 +204,6 @@ export class SQLJob {
         };
         try {
           const queryResult = await pgHelper.client.query(script);
-
-          console.log(rowCountInsert);
-          console.log(queryResult);
 
           if (rowCountInsert === 0) {
             autoCorrectionResult.approved = (queryResult.rowCount ?? 0) > 0
