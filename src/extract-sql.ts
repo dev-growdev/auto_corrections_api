@@ -10,7 +10,7 @@ import { pgHelper } from './pg-helper';
         FROM 
             auto_corrections 
         WHERE 
-            uid = 'cb1a16b2-cfe4-4e04-bd2b-f190e3583a86';
+            uid = '724e91ba-d45c-441c-92cc-49e80db197a2';
     `)
 
     await pgHelper.disconnect();
