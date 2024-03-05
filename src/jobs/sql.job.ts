@@ -220,6 +220,23 @@ export class SQLJob {
           const existResult = await pgHelper.client.query(`SELECT EXISTS(SELECT 1 FROM pg_tables WHERE tablename = 'mensalidade' ) as table_exist;`)
           autoCorrectionResult.approved = existResult.rows[0].table_exist as boolean;
         } catch (error) {
+
+          // Cria a tabela mensalidade para não impactar os próximos scripts
+          try {
+            await pgHelper.client.query(`create table mensalidade(
+              id serial primary key not null,
+              dt_vencimento date not null,
+              vlr_mensalidade real not null,
+              dt_pagamento date not null,
+              vlr_pago real not null,
+              vlr_multa real not null,
+              vlr_juros real not null,
+              matricula_id int not null references matricula(id)
+            );`);
+          } catch (error) {
+            this.log(`SQLJob \t-\t Erro ao criar a tabela mensalidade para nao impactar próximos scripts - Error: ${error}`);
+          }
+
           this.log(`SQLJob \t-\t Erro ao executar o primeiro script - Error: ${error}`);
         }
         return autoCorrectionResult;
@@ -287,6 +304,20 @@ export class SQLJob {
             await validWithoutList(queryResult)
           }
         } catch (error) {
+
+          // Popula a tabela matricula para não impactar os outros scripts
+          try {
+            // deleta os dados populados no início da função e reseta o serial para 1
+            await pgHelper.client.query(`DELETE FROM matricula; ALTER SEQUENCE matricula_id_seq RESTART WITH 1;`);
+
+            await pgHelper.client.query(`INSERT INTO matricula (dt_associacao,pessoa_id ) VALUES ('10/10/2018',1), ('10/10/2018',2),
+            ('10/10/2018',3), ('10/10/2018',4), ('10/10/2018',5), ('10/10/2018',6), 
+            ('10/10/2018',7), ('10/10/2018',8), ('10/10/2018',9), ('10/10/2018',10),
+            ('10/10/2018',11), ('10/10/2018',12), ('10/10/2018',13);`);
+          } catch (error) {
+            this.log(`SQLJob \t-\t Erro ao popular dados na tabela matricula para nao impactar próximos scripts - Error: ${error}`);
+          }
+
           this.log(`SQLJob \t-\t Erro ao executar o segundo script - Error: ${error}`);
         }
         return autoCorrectionResult;
@@ -305,6 +336,64 @@ export class SQLJob {
 
           autoCorrectionResult.approved = ((queryResult.rowCount ?? 0) || (queryResult as any as QueryResult[]).length) > 0;
         } catch (error) {
+
+          // Popula a tabela mensalidade para não impactar os próximos scripts
+          try {
+            await pgHelper.client.query(`insert into mensalidade(dt_vencimento,vlr_mensalidade,dt_pagamento,vlr_pago,vlr_multa,vlr_juros,matricula_id) values 
+            ('04/04/2023','100.00','01/04/2023','100.00','0.00','0.00',1),
+              ('04/05/2023','100.00','02/05/2023','100.00','0.00','0.00',1),
+              ('04/06/2023','100.00','01/06/2023','100.00','0.00','0.00',1),
+              ('04/07/2023','100.00','03/07/2023','100.00','0.00','0.00',1),
+              ('04/08/2023','100.00','10/08/2023','110.00','7.00','3.00',1),
+              ('04/09/2023','100.00','01/09/2023','100.00','0.00','0.00',1),
+              ('04/10/2023','100.00','02/10/2023','100.00','0.00','0.00',1),
+              ('04/11/2023','100.00','02/11/2023','100.00','0.00','0.00',1),
+              ('04/12/2023','100.00','01/12/2023','100.00','0.00','0.00',1),
+              ('04/01/2024','100.00','01/01/2024','100.00','0.00','0.00',1),
+              ('04/04/2023','100.00','01/04/2023','100.00','0.00','0.00',2),
+              ('04/05/2023','100.00','02/05/2023','100.00','0.00','0.00',2),
+              ('04/06/2023','100.00','01/06/2023','100.00','0.00','0.00',2),
+              ('04/07/2023','100.00','03/07/2023','100.00','0.00','0.00',2),
+              ('04/08/2023','100.00','10/08/2023','110.00','7.00','3.00',2),
+              ('04/09/2023','100.00','01/09/2023','100.00','0.00','0.00',2),
+              ('04/10/2023','100.00','02/10/2023','100.00','0.00','0.00',2),
+              ('04/11/2023','100.00','02/11/2023','100.00','0.00','0.00',2),
+              ('04/12/2023','100.00','01/12/2023','100.00','0.00','0.00',2),
+              ('04/01/2024','100.00','01/01/2024','100.00','0.00','0.00',2),
+              ('04/04/2023','50.00','01/04/2023','50.00','0.00','0.00',3),
+              ('04/05/2023','50.00','02/05/2023','50.00','0.00','0.00',3),
+              ('04/06/2023','50.00','01/06/2023','50.00','0.00','0.00',3),
+              ('04/07/2023','50.00','03/07/2023','50.00','0.00','0.00',3),
+              ('04/08/2023','50.00','10/08/2023','60.00','7.00','3.00',3),
+              ('04/09/2023','50.00','01/09/2023','50.00','0.00','0.00',3),
+              ('04/10/2023','50.00','02/10/2023','50.00','0.00','0.00',3),
+              ('04/11/2023','50.00','02/11/2023','50.00','0.00','0.00',3),
+              ('04/12/2023','50.00','01/12/2023','50.00','0.00','0.00',3),
+              ('04/01/2024','50.00','01/01/2024','50.00','0.00','0.00',3),
+              ('04/04/2023','50.00','01/04/2023','50.00','0.00','0.00',4),
+              ('04/05/2023','50.00','02/05/2023','50.00','0.00','0.00',4),
+              ('04/06/2023','50.00','01/06/2023','50.00','0.00','0.00',4),
+              ('04/07/2023','50.00','03/07/2023','50.00','0.00','0.00',4),
+              ('04/08/2023','50.00','10/08/2023','60.00','7.00','3.00',4),
+              ('04/09/2023','50.00','01/09/2023','50.00','0.00','0.00',4),
+              ('04/10/2023','50.00','02/10/2023','50.00','0.00','0.00',4),
+              ('04/11/2023','50.00','02/11/2023','50.00','0.00','0.00',4),
+              ('04/12/2023','50.00','01/12/2023','50.00','0.00','0.00',4),
+              ('04/01/2024','50.00','01/01/2024','50.00','0.00','0.00',4),
+              ('04/04/2023','20.00','01/04/2023','20.00','0.00','0.00',5),
+              ('04/05/2023','20.00','02/05/2023','20.00','0.00','0.00',5),
+              ('04/06/2023','20.00','01/06/2023','20.00','0.00','0.00',5),
+              ('04/07/2023','20.00','03/07/2023','20.00','0.00','0.00',5),
+              ('04/08/2023','20.00','10/08/2023','30.00','7.00','3.00',5),
+              ('04/09/2023','20.00','01/09/2023','20.00','0.00','0.00',5),
+              ('04/10/2023','20.00','02/10/2023','20.00','0.00','0.00',5),
+              ('04/11/2023','20.00','02/11/2023','20.00','0.00','0.00',5),
+              ('04/12/2023','20.00','01/12/2023','20.00','0.00','0.00',5),
+              ('04/01/2024','20.00','01/01/2024','20.00','0.00','0.00',5);`);
+          } catch (error) {
+            this.log(`SQLJob \t-\t Erro ao popular dados na tabela mensalidade para nao impactar próximos scripts - Error: ${error}`);
+          }
+
           this.log(`SQLJob \t-\t Erro ao inserir dados na tabela MENSALIDADE - Error: ${error}`);
         }
         return autoCorrectionResult;
