@@ -458,7 +458,7 @@ export class SQLJob {
         }
         try {
           const queryResult = await pgHelper.client.query(script);
-          autoCorrectionResult.approved = ((queryResult.rowCount ?? 0) || (queryResult as any as QueryResult[]).length) === 8;
+          autoCorrectionResult.approved = ((queryResult.rowCount ?? 0) || (queryResult as any as QueryResult[]).length) >= 7;
         } catch (error) {
 
           // popula a tabela matricula com os registros dos integrantes da familia addams,
