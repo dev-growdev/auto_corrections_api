@@ -40,14 +40,14 @@ export class SQLJob {
         (autoCorrection) => this.correctSecondStep(autoCorrection)
       );
 
-      // // Fase 03
+      // Fase 03
       this.log(`SQLJob \t-\t Inicia Fase 3`);
       await this.getAutoCorrectionsPerStep(
         '9ad73459-d5a8-42ec-9d5f-b50c7a91b37e',
         (autoCorrection) => this.correctThirdStep(autoCorrection)
       );
 
-      // // Fase 04
+      // Fase 04
       this.log(`SQLJob \t-\t Inicia Fase 4`);
       await this.getAutoCorrectionsPerStep(
         'c524e2c7-eed1-42ef-9c6a-86a6fdee608b',
@@ -586,7 +586,6 @@ export class SQLJob {
             ('2023-08-24','2023-08-24',5,12);`);
           } catch (error) {
             this.log(`SQLJob \t-\t Erro ao inserir dados na tabela reserva_equipamento para nao impactar próximos scripts - Error: ${error}`);
-            throw error;
           }
 
           this.log(`SQLJob \t-\t Erro ao executar o segundo script - Error: ${error}`);
@@ -620,6 +619,9 @@ export class SQLJob {
           title: 'Validação script selecionar dados na view VW_RESERVA_EQUIPAMENTO',
           approved: false,
         }
+
+        if (!script) return autoCorrectionResult;
+
         try {
           const queryResult = await pgHelper.client.query(script);
           // 5 equipamentos x 12 pessoas = 60 
@@ -630,12 +632,11 @@ export class SQLJob {
         return autoCorrectionResult;
       }
 
-      const resultFourScript = await validFourScript(script4.value);
+      const resultFourScript = await validFourScript(script4?.value);
       results.push(resultFourScript);
 
       await this.clearInitialData();
     } catch (error) {
-      console.log(error);
       this.log(`SQLJob \t-\t Erro na correção do desafio da fase 4 - Error: ${error}`);
     }
 
@@ -739,52 +740,51 @@ export class SQLJob {
 
   private async clearInitialData(): Promise<void> {
     try {
+      await pgHelper.client.query(`DROP TABLE IF EXISTS vw_reserva_associado;`);
+    } catch (error: any) {
+      this.log(`SQLJob \t-\t Erro ao excluir a tabela (view) vw_reserva_associado - Error: ${error}`);
+    }
+
+    try {
       await pgHelper.client.query(`DROP VIEW IF EXISTS vw_reserva_associado;`);
     } catch (error) {
       this.log(`SQLJob \t-\t Erro ao excluir a view vw_reserva_associado - Error: ${error}`);
-      throw error;
     }
 
     try {
       await pgHelper.client.query(`DROP TABLE IF EXISTS mensalidade;`);
     } catch (error) {
       this.log(`SQLJob \t-\t Erro ao excluir tabela mensalidade - Error: ${error}`);
-      throw error;
     }
 
     try {
       await pgHelper.client.query(`DROP TABLE IF EXISTS reserva_equipamento;`);
     } catch (error) {
       this.log(`SQLJob \t-\t Erro ao excluir tabela reserva_equipamento - Error: ${error}`);
-      throw error;
     }
 
     try {
       await pgHelper.client.query(`DROP TABLE IF EXISTS equipamento;`);
     } catch (error) {
       this.log(`SQLJob \t-\t Erro ao excluir tabela equipamento - Error: ${error}`);
-      throw error;
     }
 
     try {
       await pgHelper.client.query(`DROP TABLE IF EXISTS matricula;`);
     } catch (error) {
       this.log(`SQLJob \t-\t Erro ao excluir tabela matricula - Error: ${error}`);
-      throw error;
     }
 
     try {
       await pgHelper.client.query(`DROP TABLE IF EXISTS pessoa;`);
     } catch (error) {
       this.log(`SQLJob \t-\t Erro ao excluir tabela pessoa - Error: ${error}`);
-      throw error;
     }
 
     try {
       await pgHelper.client.query(`DROP TABLE IF EXISTS familia;`);
     } catch (error) {
       this.log(`SQLJob \t-\t Erro ao excluir tabela familia - Error: ${error}`);
-      throw error;
     }
   }
 

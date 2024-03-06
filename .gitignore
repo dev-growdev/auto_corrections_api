@@ -5,5 +5,5 @@ log.txt
 logSQL.txt
 output_test.txt
 logs/flutter/*
-src/jobs/
+src/jobs/logs/*
 **/.DS_Store
