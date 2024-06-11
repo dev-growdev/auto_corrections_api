@@ -29,6 +29,8 @@ export class SQLJob {
     try {
       this.startLog();
 
+      console.log('SQL - Iniciando')
+
       this.log('SQLJob \t-\t Iniciando');
 
       await pgHelper.connect();
@@ -53,11 +55,14 @@ export class SQLJob {
         'c524e2c7-eed1-42ef-9c6a-86a6fdee608b',
         (autoCorrection) => this.correctFourthStep(autoCorrection)
       );
+      
     } catch (error) {
       this.log(`SQLJob \t-\t Error ao executar fases: ${error}`);
+      console.log('SQL - Erro')
     } finally {
       await pgHelper.disconnect();
       this.log('SQLJob \t-\t Finalizou');
+      console.log('SQL - Finalizou')
       this.finishLog();
     }
   }
@@ -123,6 +128,9 @@ export class SQLJob {
       // apaga a tabela se existir
       try {
         await pgHelper.client.query(`DROP TABLE IF EXISTS perguntas_respostas;`);
+        await pgHelper.client.query(`DROP TABLE IF EXISTS pergunta_resposta;`);
+        await pgHelper.client.query(`DROP TABLE IF EXISTS perguntas_resposta;`);
+        await pgHelper.client.query(`DROP TABLE IF EXISTS pergunta_respostas;`);
       } catch (_) { }
 
       const validFirstScript = async (script: string) => {
@@ -140,8 +148,8 @@ export class SQLJob {
             await pgHelper.client.query(`DROP TABLE IF EXISTS perguntas_respostas;`);
 
             await pgHelper.client.query(`CREATE TABLE perguntas_respostas(
-              PERGUNTA varchar(1000),
-              RESPOSTA varchar(1000)
+              PERGUNTA varchar(5000),
+              RESPOSTA varchar(5000)
             );`);
 
           } catch (error) {
@@ -809,7 +817,7 @@ export class SQLJob {
   private log(message: string) {
     try {
       const text = `${this.getNowFormatted()} \t - \t ${message} \n`;
-      console.log(text);
+      // console.log(text);
       this.writeStream?.write(text);
     } catch (_) { }
   }
