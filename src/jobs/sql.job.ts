@@ -740,52 +740,100 @@ export class SQLJob {
 
   private async clearInitialData(): Promise<void> {
     try {
-      await pgHelper.client.query(`DROP TABLE IF EXISTS vw_reserva_associado;`);
-    } catch (error: any) {
-      this.log(`SQLJob \t-\t Erro ao excluir a tabela (view) vw_reserva_associado - Error: ${error}`);
+      // remove view criada como table
+      const tableViewNames = (await pgHelper.client.query(`SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename ilike 'vw%';`)).rows;
+
+      if (tableViewNames.length) {
+        const tableViews = tableViewNames
+          .map(({ tablename }) => `"public"."${tablename}"`)
+          .join(', ');
+
+        const queryDropTableViews = `DROP TABLE IF EXISTS ${tableViews};`;
+        console.log(queryDropTableViews)
+
+        await pgHelper.client.query(queryDropTableViews);
+      }
+
+      // remove as views
+      const viewsNames = (await pgHelper.client.query(`SELECT viewname FROM pg_views WHERE schemaname='public' and viewname not ilike 'pg%';`)).rows;
+
+      if (viewsNames.length) {
+        const views = viewsNames
+          .map(({ viewname }) => `"public"."${viewname}"`)
+          .join(', ');
+
+        const queryDropViews = `DROP VIEW IF EXISTS ${views};`;
+
+        await pgHelper.client.query(queryDropViews);
+      }
+    } catch (error) {
+      this.log(`SQLJob \t-\t Erro ao limpar as views - Error: ${error}`);
     }
 
     try {
-      await pgHelper.client.query(`DROP VIEW IF EXISTS vw_reserva_associado;`);
+      const tableNames = (await pgHelper.client.query(`SELECT tablename FROM pg_tables WHERE schemaname='public'`)).rows;
+
+      if (tableNames.length) {
+        const tables = tableNames
+          .map(({ tablename }) => `"public"."${tablename}"`)
+          .join(', ');
+
+        const queryDropTables = `DROP TABLE IF EXISTS ${tables};`;
+
+        await pgHelper.client.query(queryDropTables);
+      }
+
     } catch (error) {
-      this.log(`SQLJob \t-\t Erro ao excluir a view vw_reserva_associado - Error: ${error}`);
+      this.log(`SQLJob \t-\t Erro ao limpar as tables - Error: ${error}`);
     }
 
-    try {
-      await pgHelper.client.query(`DROP TABLE IF EXISTS mensalidade;`);
-    } catch (error) {
-      this.log(`SQLJob \t-\t Erro ao excluir tabela mensalidade - Error: ${error}`);
-    }
+    // try {
+    //   await pgHelper.client.query(`DROP TABLE IF EXISTS vw_reserva_associado;`);
+    // } catch (error: any) {
+    //   this.log(`SQLJob \t-\t Erro ao excluir a tabela (view) vw_reserva_associado - Error: ${error}`);
+    // }
 
-    try {
-      await pgHelper.client.query(`DROP TABLE IF EXISTS reserva_equipamento;`);
-    } catch (error) {
-      this.log(`SQLJob \t-\t Erro ao excluir tabela reserva_equipamento - Error: ${error}`);
-    }
+    // try {
+    //   await pgHelper.client.query(`DROP VIEW IF EXISTS vw_reserva_associado;`);
+    // } catch (error) {
+    //   this.log(`SQLJob \t-\t Erro ao excluir a view vw_reserva_associado - Error: ${error}`);
+    // }
 
-    try {
-      await pgHelper.client.query(`DROP TABLE IF EXISTS equipamento;`);
-    } catch (error) {
-      this.log(`SQLJob \t-\t Erro ao excluir tabela equipamento - Error: ${error}`);
-    }
+    // try {
+    //   await pgHelper.client.query(`DROP TABLE IF EXISTS mensalidade;`);
+    // } catch (error) {
+    //   this.log(`SQLJob \t-\t Erro ao excluir tabela mensalidade - Error: ${error}`);
+    // }
 
-    try {
-      await pgHelper.client.query(`DROP TABLE IF EXISTS matricula;`);
-    } catch (error) {
-      this.log(`SQLJob \t-\t Erro ao excluir tabela matricula - Error: ${error}`);
-    }
+    // try {
+    //   await pgHelper.client.query(`DROP TABLE IF EXISTS reserva_equipamento;`);
+    // } catch (error) {
+    //   this.log(`SQLJob \t-\t Erro ao excluir tabela reserva_equipamento - Error: ${error}`);
+    // }
 
-    try {
-      await pgHelper.client.query(`DROP TABLE IF EXISTS pessoa;`);
-    } catch (error) {
-      this.log(`SQLJob \t-\t Erro ao excluir tabela pessoa - Error: ${error}`);
-    }
+    // try {
+    //   await pgHelper.client.query(`DROP TABLE IF EXISTS equipamento;`);
+    // } catch (error) {
+    //   this.log(`SQLJob \t-\t Erro ao excluir tabela equipamento - Error: ${error}`);
+    // }
 
-    try {
-      await pgHelper.client.query(`DROP TABLE IF EXISTS familia;`);
-    } catch (error) {
-      this.log(`SQLJob \t-\t Erro ao excluir tabela familia - Error: ${error}`);
-    }
+    // try {
+    //   await pgHelper.client.query(`DROP TABLE IF EXISTS matricula;`);
+    // } catch (error) {
+    //   this.log(`SQLJob \t-\t Erro ao excluir tabela matricula - Error: ${error}`);
+    // }
+
+    // try {
+    //   await pgHelper.client.query(`DROP TABLE IF EXISTS pessoa;`);
+    // } catch (error) {
+    //   this.log(`SQLJob \t-\t Erro ao excluir tabela pessoa - Error: ${error}`);
+    // }
+
+    // try {
+    //   await pgHelper.client.query(`DROP TABLE IF EXISTS familia;`);
+    // } catch (error) {
+    //   this.log(`SQLJob \t-\t Erro ao excluir tabela familia - Error: ${error}`);
+    // }
   }
 
   private getNowFormatted() {

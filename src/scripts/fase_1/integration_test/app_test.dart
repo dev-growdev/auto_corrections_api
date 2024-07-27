@@ -25,7 +25,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('imageMedium')), findsOneWidget);
+      expect(find.byKey(const ValueKey('image_medium')), findsOneWidget);
 
       results.last.approved = true;
     });
@@ -39,7 +39,7 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('textTitle')), findsOneWidget);
+      expect(find.byKey(const ValueKey('text_title')), findsOneWidget);
       expect(find.text("Join Medium."), findsOneWidget);
 
       results.last.approved = true;
@@ -54,10 +54,10 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('signupGoogle')), findsOneWidget);
+      expect(find.byKey(const ValueKey('btn_signup_google')), findsOneWidget);
       expect(find.text("Sign up with Google"), findsOneWidget);
 
-      await tester.tap(find.byKey(const ValueKey('signupGoogle')));
+      await tester.tap(find.byKey(const ValueKey('btn_signup_google')));
 
       results.last.approved = true;
     });
@@ -71,10 +71,10 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('signupEmail')), findsOneWidget);
+      expect(find.byKey(const ValueKey('btn_signup_email')), findsOneWidget);
       expect(find.text("Sign up with Email"), findsOneWidget);
 
-      await tester.tap(find.byKey(const ValueKey('signupEmail')));
+      await tester.tap(find.byKey(const ValueKey('btn_signup_email')));
 
       results.last.approved = true;
     });
@@ -88,7 +88,7 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('dividerLeft')), findsOneWidget);
+      expect(find.byKey(const ValueKey('divider_left')), findsOneWidget);
 
       results.last.approved = true;
     });
@@ -116,7 +116,7 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('dividerRight')), findsOneWidget);
+      expect(find.byKey(const ValueKey('divider_right')), findsOneWidget);
 
       results.last.approved = true;
     });
@@ -130,8 +130,8 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('buttonFacebook')), findsOneWidget);
-      await tester.tap(find.byKey(const ValueKey('buttonFacebook')));
+      expect(find.byKey(const ValueKey('btn_facebook')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('btn_facebook')));
 
       results.last.approved = true;
     });
