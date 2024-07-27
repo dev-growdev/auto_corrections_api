@@ -24,7 +24,7 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key("appBarTitle")), findsOneWidget);
+      expect(find.byKey(const Key("appbar_title")), findsOneWidget);
       expect(find.text('Minhas listas'), findsOneWidget);
 
       results.last.approved = true;
@@ -54,7 +54,7 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key("emptyListImage")), findsOneWidget);
+      expect(find.byKey(const Key("image_empty_list")), findsOneWidget);
 
       results.last.approved = true;
     });
@@ -84,7 +84,7 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key("addListBtn")), findsOneWidget);
+      expect(find.byKey(const Key("btn_add_list")), findsOneWidget);
 
       results.last.approved = true;
     });
@@ -98,16 +98,16 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key("addListBtn")), findsOneWidget);
-      await tester.tap(find.byKey(const Key("addListBtn")));
+      expect(find.byKey(const Key("btn_add_list")), findsOneWidget);
+      await tester.tap(find.byKey(const Key("btn_add_list")));
 
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key("listNameInput")), findsOneWidget);
-      expect(find.byKey(const Key("backToListsBtn")), findsOneWidget);
-      expect(find.byKey(const Key("createListBtn")), findsOneWidget);
+      expect(find.byKey(const Key("input_list_name")), findsOneWidget);
+      expect(find.byKey(const Key("btn_back_to_lists")), findsOneWidget);
+      expect(find.byKey(const Key("btn_create_list")), findsOneWidget);
 
-      await tester.tap(find.byKey(const Key("backToListsBtn")));
+      await tester.tap(find.byKey(const Key("btn_back_to_lists")));
 
       await tester.pumpAndSettle();
 
@@ -125,19 +125,20 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key("addListBtn")), findsOneWidget);
-      await tester.tap(find.byKey(const Key("addListBtn")));
+      expect(find.byKey(const Key("btn_add_list")), findsOneWidget);
+      await tester.tap(find.byKey(const Key("btn_add_list")));
 
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key("listNameInput")), findsOneWidget);
+      expect(find.byKey(const Key("input_list_name")), findsOneWidget);
 
-      await tester.enterText(find.byKey(const Key("listNameInput")), ('teste'));
-      await tester.tap(find.byKey(const Key("createListBtn")));
+      await tester.enterText(
+          find.byKey(const Key("input_list_name")), ('teste'));
+      await tester.tap(find.byKey(const Key("btn_create_list")));
 
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key("shoppingListCard")), findsOneWidget);
+      expect(find.byKey(const Key("card_shopping_list")), findsOneWidget);
       expect(find.text('teste'), findsWidgets);
       expect(find.text('0/0'), findsOneWidget);
 
@@ -154,18 +155,19 @@ void main() {
       await tester.pumpAndSettle();
 
       // entra na tela para adicioanr uma lista
-      await tester.tap(find.byKey(const Key("addListBtn")));
+      await tester.tap(find.byKey(const Key("btn_add_list")));
 
       await tester.pumpAndSettle();
 
       // cria a lista com um nome
-      await tester.enterText(find.byKey(const Key("listNameInput")), ('teste'));
-      await tester.tap(find.byKey(const Key("createListBtn")));
+      await tester.enterText(
+          find.byKey(const Key("input_list_name")), ('teste'));
+      await tester.tap(find.byKey(const Key("btn_create_list")));
 
       await tester.pumpAndSettle();
 
       // // entra na lista
-      await tester.tap(find.byKey(const Key("shoppingListCard")));
+      await tester.tap(find.byKey(const Key("card_shopping_list")));
 
       await tester.pumpAndSettle();
 
@@ -194,18 +196,19 @@ void main() {
       await tester.pumpAndSettle();
 
       // entra na tela de criar lista
-      await tester.tap(find.byKey(const Key("addListBtn")));
+      await tester.tap(find.byKey(const Key("btn_add_list")));
 
       await tester.pumpAndSettle();
 
       // cria a lista com um nome
-      await tester.enterText(find.byKey(const Key("listNameInput")), ('teste'));
-      await tester.tap(find.byKey(const Key("createListBtn")));
+      await tester.enterText(
+          find.byKey(const Key("input_list_name")), ('teste'));
+      await tester.tap(find.byKey(const Key("btn_create_list")));
 
       await tester.pumpAndSettle();
 
       // navega para a lista criada
-      await tester.tap(find.byKey(const Key("shoppingListCard")));
+      await tester.tap(find.byKey(const Key("card_shopping_list")));
 
       await tester.pumpAndSettle();
 
@@ -215,9 +218,11 @@ void main() {
       await tester.pumpAndSettle();
 
       // adiciona as info nos campos e cria o item
-      await tester.enterText(find.byKey(const Key("inputItem")), ('itemteste'));
-      await tester.enterText(find.byKey(const Key("inputValue")), ('555'));
-      await tester.tap(find.byKey(const Key("addItemBtn")));
+      await tester.enterText(
+          find.byKey(const Key("input_item_name")), ('itemteste'));
+      await tester.enterText(
+          find.byKey(const Key("input_item_value")), ('555'));
+      await tester.tap(find.byKey(const Key("btn_add_item")));
 
       await tester.pumpAndSettle();
 
@@ -238,18 +243,19 @@ void main() {
       await tester.pumpAndSettle();
 
       // entra na tela de criar lista
-      await tester.tap(find.byKey(const Key("addListBtn")));
+      await tester.tap(find.byKey(const Key("btn_add_list")));
 
       await tester.pumpAndSettle();
 
       // cria a lista com um nome
-      await tester.enterText(find.byKey(const Key("listNameInput")), ('teste'));
-      await tester.tap(find.byKey(const Key("createListBtn")));
+      await tester.enterText(
+          find.byKey(const Key("input_list_name")), ('teste'));
+      await tester.tap(find.byKey(const Key("btn_create_list")));
 
       await tester.pumpAndSettle();
 
       // navega para a lista criada
-      await tester.tap(find.byKey(const Key("shoppingListCard")));
+      await tester.tap(find.byKey(const Key("card_shopping_list")));
 
       await tester.pumpAndSettle();
 
@@ -259,7 +265,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // clica no botao para add sem adicionar as infos
-      await tester.tap(find.byKey(const Key("addItemBtn")));
+      await tester.tap(find.byKey(const Key("btn_add_item")));
 
       await tester.pumpAndSettle();
 
@@ -278,18 +284,19 @@ void main() {
       await tester.pumpAndSettle();
 
       // entra na tela para criar lista
-      await tester.tap(find.byKey(const Key("addListBtn")));
+      await tester.tap(find.byKey(const Key("btn_add_list")));
 
       await tester.pumpAndSettle();
 
       // cria uma lista com um nome
-      await tester.enterText(find.byKey(const Key("listNameInput")), ('teste'));
-      await tester.tap(find.byKey(const Key("createListBtn")));
+      await tester.enterText(
+          find.byKey(const Key("input_list_name")), ('teste'));
+      await tester.tap(find.byKey(const Key("btn_create_list")));
 
       await tester.pumpAndSettle();
 
       // entra dentro da lista
-      await tester.tap(find.byKey(const Key("shoppingListCard")));
+      await tester.tap(find.byKey(const Key("card_shopping_list")));
 
       await tester.pumpAndSettle();
 
@@ -299,9 +306,11 @@ void main() {
       await tester.pumpAndSettle();
 
       // cria um item com as infos
-      await tester.enterText(find.byKey(const Key("inputItem")), ('itemteste'));
-      await tester.enterText(find.byKey(const Key("inputValue")), ('555'));
-      await tester.tap(find.byKey(const Key("addItemBtn")));
+      await tester.enterText(
+          find.byKey(const Key("input_item_name")), ('itemteste'));
+      await tester.enterText(
+          find.byKey(const Key("input_item_value")), ('555'));
+      await tester.tap(find.byKey(const Key("btn_add_item")));
 
       await tester.pumpAndSettle();
 
@@ -309,10 +318,10 @@ void main() {
       expect(find.textContaining("R\$ 5.55"), findsWidgets);
 
       // clica no checkbox
-      await tester.tap(find.byKey(const Key("productCheckbox")));
+      await tester.tap(find.byKey(const Key("checkbox_product")));
 
       // atualiza a lista
-      await tester.tap(find.byKey(const Key("updateListBtn")));
+      await tester.tap(find.byKey(const Key("btn_update_list")));
 
       await tester.pumpAndSettle();
 
@@ -331,24 +340,25 @@ void main() {
       await tester.pumpAndSettle();
 
       // entra na tela para criar lista
-      await tester.tap(find.byKey(const Key("addListBtn")));
+      await tester.tap(find.byKey(const Key("btn_add_list")));
 
       await tester.pumpAndSettle();
 
       // cria uma lista com um nome
-      await tester.enterText(find.byKey(const Key("listNameInput")), ('teste'));
-      await tester.tap(find.byKey(const Key("createListBtn")));
+      await tester.enterText(
+          find.byKey(const Key("input_list_name")), ('teste'));
+      await tester.tap(find.byKey(const Key("btn_create_list")));
 
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key("shoppingListCard")), findsOneWidget);
+      expect(find.byKey(const Key("card_shopping_list")), findsOneWidget);
 
       // exclui a lista
-      await tester.longPress(find.byKey(const Key("shoppingListCard")));
+      await tester.longPress(find.byKey(const Key("card_shopping_list")));
 
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key("shoppingListCard")), findsNothing);
+      expect(find.byKey(const Key("card_shopping_list")), findsNothing);
 
       results.last.approved = true;
     });
