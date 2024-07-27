@@ -4,7 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:integration_test/integration_test.dart';
 
 import '../lib/main.dart' as app;
-import 'send_test_result.dart';
+import 'json.dart';
 
 void main() {
   final List<TestResult> results = [];
@@ -42,7 +42,7 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('inputSearch')), findsOneWidget);
+      expect(find.byKey(const Key('input_search')), findsOneWidget);
 
       results.last.approved = true;
     });
@@ -142,12 +142,12 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      final firstProductItem = find.byKey(const Key("productItem")).first;
+      final firstProductItem = find.byKey(const Key("product_item")).first;
 
       expect(
         find.descendant(
           of: firstProductItem,
-          matching: find.byKey(const Key("productImage")),
+          matching: find.byKey(const Key("image_product_item")),
         ),
         findsOneWidget,
       );
@@ -220,7 +220,7 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      final cardFinder = find.byKey(const Key('addProductToCart')).first;
+      final cardFinder = find.byKey(const Key('btn_add_product_to_cart')).first;
       await tester.tap(cardFinder);
 
       await tester.pumpAndSettle();
@@ -241,7 +241,7 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      final cardFinder = find.byKey(const Key('addProductToCart')).first;
+      final cardFinder = find.byKey(const Key('btn_add_product_to_cart')).first;
       await tester.tap(cardFinder);
 
       await tester.pumpAndSettle();
@@ -271,7 +271,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.shopping_cart_outlined));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('imageCart')), findsOneWidget);
+      expect(find.byKey(const Key('image_cart')), findsOneWidget);
       expect(find.text('Carrinho de compras'), findsOneWidget);
 
       results.last.approved = true;
@@ -288,7 +288,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // adiciona o produto no carrinho
-      final cardFinder = find.byKey(const Key('addProductToCart')).first;
+      final cardFinder = find.byKey(const Key('btn_add_product_to_cart')).first;
       await tester.tap(cardFinder);
 
       // navega para o carrinho de compras
@@ -297,7 +297,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // se nao tiver a imagem na tela é pq ta mostrando os produtos
-      expect(find.byKey(const Key('imageCart')), findsNothing);
+      expect(find.byKey(const Key('image_cart')), findsNothing);
 
       results.last.approved = true;
     });
