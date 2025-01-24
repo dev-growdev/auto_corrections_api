@@ -29,7 +29,7 @@ export class SQLJob {
     try {
       this.startLog();
 
-      console.log('SQL - Iniciando')
+      console.log(new Date()+' - SQL - Iniciando')
 
       this.log('SQLJob \t-\t Iniciando');
 
@@ -58,11 +58,11 @@ export class SQLJob {
       
     } catch (error) {
       this.log(`SQLJob \t-\t Error ao executar fases: ${error}`);
-      console.log('SQL - Erro')
+      console.log(new Date()+ ' - SQL - Erro')
     } finally {
       await pgHelper.disconnect();
       this.log('SQLJob \t-\t Finalizou');
-      console.log('SQL - Finalizou')
+      console.log(new Date()+ ' - SQL - Finalizou')
       this.finishLog();
     }
   }
