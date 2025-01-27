@@ -1,10 +1,10 @@
-import 'dotenv/config';
+import "dotenv/config";
 
-import { pgHelper } from '../pg-helper';
-import axios from 'axios';
-import fs from 'node:fs';
-import { QueryResult } from 'pg';
-import path from 'node:path';
+import { pgHelper } from "../pg-helper";
+import axios from "axios";
+import fs from "node:fs";
+import { QueryResult } from "pg";
+import path from "node:path";
 
 interface AutoCorrection {
   uid: string;
@@ -29,40 +29,39 @@ export class SQLJob {
     try {
       this.startLog();
 
-      console.log(new Date()+' - SQL - Iniciando')
+      console.log(new Date() + " - SQL - Iniciando");
 
-      this.log('SQLJob \t-\t Iniciando');
+      this.log("SQLJob \t-\t Iniciando");
 
       await pgHelper.connect();
 
       // Fase 02
       this.log(`SQLJob \t-\t Inicia Fase 2`);
       await this.getAutoCorrectionsPerStep(
-        '3a231abf-d826-4e46-a2c0-e030822f11f8',
+        "3a231abf-d826-4e46-a2c0-e030822f11f8",
         (autoCorrection) => this.correctSecondStep(autoCorrection)
       );
 
       // Fase 03
       this.log(`SQLJob \t-\t Inicia Fase 3`);
       await this.getAutoCorrectionsPerStep(
-        '9ad73459-d5a8-42ec-9d5f-b50c7a91b37e',
+        "9ad73459-d5a8-42ec-9d5f-b50c7a91b37e",
         (autoCorrection) => this.correctThirdStep(autoCorrection)
       );
 
       // Fase 04
       this.log(`SQLJob \t-\t Inicia Fase 4`);
       await this.getAutoCorrectionsPerStep(
-        'c524e2c7-eed1-42ef-9c6a-86a6fdee608b',
+        "c524e2c7-eed1-42ef-9c6a-86a6fdee608b",
         (autoCorrection) => this.correctFourthStep(autoCorrection)
       );
-      
     } catch (error) {
       this.log(`SQLJob \t-\t Error ao executar fases: ${error}`);
-      console.log(new Date()+ ' - SQL - Erro')
+      console.log(new Date() + " - SQL - Erro");
     } finally {
       await pgHelper.disconnect();
-      this.log('SQLJob \t-\t Finalizou');
-      console.log(new Date()+ ' - SQL - Finalizou')
+      this.log("SQLJob \t-\t Finalizou");
+      console.log(new Date() + " - SQL - Finalizou");
       this.finishLog();
     }
   }
@@ -75,7 +74,7 @@ export class SQLJob {
   ): Promise<void> {
     try {
       const growacademyApi = process.env.GROWACADEMY_API_URL as string;
-      const classUid = 'a89b386b-cfc1-429f-97e1-8dded6174d63';
+      const classUid = "a89b386b-cfc1-429f-97e1-8dded6174d63";
 
       // Busca as autoCorrections
       const response = await axios.get(`${growacademyApi}/auto-corrections`, {
@@ -124,112 +123,135 @@ export class SQLJob {
     const results: AutoCorrectionResultDTO[] = [];
 
     try {
-
       // apaga a tabela se existir
       try {
-        await pgHelper.client.query(`DROP TABLE IF EXISTS perguntas_respostas;`);
+        await pgHelper.client.query(
+          `DROP TABLE IF EXISTS perguntas_respostas;`
+        );
         await pgHelper.client.query(`DROP TABLE IF EXISTS pergunta_resposta;`);
         await pgHelper.client.query(`DROP TABLE IF EXISTS perguntas_resposta;`);
         await pgHelper.client.query(`DROP TABLE IF EXISTS pergunta_respostas;`);
-      } catch (_) { }
+      } catch (_) {}
 
       const validFirstScript = async (script: string) => {
         const autoCorrectionResult: AutoCorrectionResultDTO = {
-          title: 'Validação script criar tabela PERGUNTAS_RESPOSTAS',
+          title: "Validação script criar tabela PERGUNTAS_RESPOSTAS",
           approved: false,
-        }
+        };
         try {
           await pgHelper.client.query(script);
-          const existResult = await pgHelper.client.query(`SELECT EXISTS(SELECT 1 FROM pg_tables WHERE tablename = 'perguntas_respostas' ) as table_exist;`)
-          autoCorrectionResult.approved = existResult.rows[0].table_exist as boolean;
+          const existResult = await pgHelper.client.query(
+            `SELECT EXISTS(SELECT 1 FROM pg_tables WHERE tablename = 'perguntas_respostas' ) as table_exist;`
+          );
+          autoCorrectionResult.approved = existResult.rows[0]
+            .table_exist as boolean;
         } catch (error) {
           try {
             // apaga a tabela se existir
-            await pgHelper.client.query(`DROP TABLE IF EXISTS perguntas_respostas;`);
+            await pgHelper.client.query(
+              `DROP TABLE IF EXISTS perguntas_respostas;`
+            );
 
             await pgHelper.client.query(`CREATE TABLE perguntas_respostas(
               PERGUNTA varchar(5000),
               RESPOSTA varchar(5000)
             );`);
-
           } catch (error) {
-            this.log(`SQLJob \t-\t Erro ao criar a tabela PERGUNTAS_RESPOSTAS para nao impactar os próximos scripts - Error: ${error}`);
+            this.log(
+              `SQLJob \t-\t Erro ao criar a tabela PERGUNTAS_RESPOSTAS para nao impactar os próximos scripts - Error: ${error}`
+            );
           }
 
-          this.log(`SQLJob \t-\t Erro ao executar o primeiro script - Error: ${error}`);
+          this.log(
+            `SQLJob \t-\t Erro ao executar o primeiro script - Error: ${error}`
+          );
         }
         return autoCorrectionResult;
-      }
+      };
 
       const resultFirstScript = await validFirstScript(script1.value);
       results.push(resultFirstScript);
 
       const validSecondScript = async (script: string) => {
         const autoCorrectionResult = {
-          title: 'Validação script inserir dados PERGUNTAS_RESPOSTAS',
+          title: "Validação script inserir dados PERGUNTAS_RESPOSTAS",
           approved: false,
         };
 
         let rowCountInsert = 0;
         try {
           const queryResult = await pgHelper.client.query(script);
-          autoCorrectionResult.approved = ((queryResult.rowCount ?? 0) || (queryResult as any as QueryResult[]).length) > 0;
-          rowCountInsert = (queryResult.rowCount ?? 0) || (queryResult as any as QueryResult[]).length
+          autoCorrectionResult.approved =
+            ((queryResult.rowCount ?? 0) ||
+              (queryResult as any as QueryResult[]).length) > 0;
+          rowCountInsert =
+            (queryResult.rowCount ?? 0) ||
+            (queryResult as any as QueryResult[]).length;
         } catch (error: any) {
           try {
             // apaga qualquer registro se existir
             await pgHelper.client.query(`DELETE FROM perguntas_respostas;`);
 
-            await pgHelper.client.query(`insert into perguntas_respostas(pergunta, resposta) values
-            ('Eu consido atuar no mercado com essa formação da Growdev?', 'Sim. Após você terminar os dois módulos desta formação (introdução à ciência de dados e o analista de dados) você estará apto para atuar no mercado.'),
-            ('Não tenho conhecimento na área de dados, essa formação é pra mim?', 'Esta formação busca te preparar para a área de analista de dados mesmo que você não tenha conhecimento nesta área. O programa conta com um módulo introdutório que ajuda a nivelar o conhecimento de todos(as) os(as) alunos(as).'),
-            ('Como serão as aulas, vou ter suporte de mentores?', 'Sim, os nossos mentores são profissionais que atuam no mercado e irão compartilhar a experiência deles nas aulas ao vivo.'),
-            ('Qual o papel do mentor?', 'O mentor será o mediador do seu conhecimento. Ele te ajudará a entender os conceitos que serão colocados em prática nas aulas. Através de uma metodologia que busca fazer com que o aluno pratique bastante sendo o protagonista da sua aprendizagem.'),
-            ('Se eu faltar alguma aula, consigo recuperar o conteúdo?', 'Sim, as aulas são gravadas para que você possa recuperar alguma aula perdida ou ainda rever conteúdos. Mas sua presença ao vivo é essencial para nossa metodologia e seu aprendizado.'),
-            ('Vou receber certificado em cada módulo?', 'Sim. Ao finalizar cada módulo você receberá um certificado que além de validar o conhecimento que você adquiriu até o momento, poderá ser utilizado como "horas complementares" na sua graduação.'),
-            ('Posso pagar depois de terminar a formação e quando estiver trabalhando?', 'Temos várias opções de investimento para esta formação, com e sem carência para começar a pagar, porém o ISA não está disponível.'),
-            ('A Growdev pode cancelar o meu contrato caso eu não realize o que foi acordado?', 'Sim, no contrato educacional existem regras para o sucesso do aluno. Logo se em algum momento você não seguir algo que esteja no contrato você poderá ser cancelado.'),
-            ('Quantas horas de dedicação eu preciso ter por semana?', 'Estima-se que o aluno, em média, precisará de 15h semanais para o desenvolvimento de suas atividades síncronas e assíncronas. Ressaltamos que a carga horária sugerida ao(à) aluno(a) está diretamente ligada à sua dedicação e, com o propósito de tratar todos(as) de forma igual. Sendo assim, este número pode variar de pessoa para pessoa, dado o background pré-existente de cada, a facilidade de aprendizado, organização, etc.'),
-            ('Requisitos que preciso ter?', 'Ter 18 anos; Ensino médio completo; Ter disponibilidade horários (Síncronos e Assíncronos): Aulas ao vivo nas sextas-feiras das 19h às 22h30min e alguns sábados das 8h às 11h30min (encontros síncronos); Infraestrutura: computador com 4g de memória ram, webcam, microfone e internet rápida. Comprometimento, dedicação e muita vontade de aprender!'),
-            ('Como funciona a plataforma de estudos?', 'Utilizamos o Classroom do Google como ambiente virtual de aprendizagem. Nele constam materiais complementares como: conteúdos, vídeos, atividades e desafios. Além disso, será por ele que você fará as entregas das atividades.');`);
-            rowCountInsert = 11;
+            await pgHelper.client
+              .query(`insert into perguntas_respostas(pergunta, resposta) values
+            ('Qualquer pessoa tem direito ao certificado de Pós Graduação?', 'O Certificado de Pós-Graduação reconhecido pelo MEC será disponibilizado apenas para alunos que apresentarem Diploma de Graduação ou documento comprobatório de conclusão do Ensino Superior dentro do prazo e atingir os requisitos de aprovação da formação.'), 
+            ('Não possuo Ensino Superior Completo mas quero fazer a Formação. Tenho direito a certificado?', 'Sim! Para não-graduados, a Formação também garante Certificado de Conclusão reconhecido pelo mercado, atestando seu empenho e aprendizado, desde que atinja os requisitos para aprovação.'),
+            ('Qual é o período para conclusão da Formação?', 'Para cada Formação, você terá acesso às aulas e atividades por 12 meses a partir da data de contratação.'), 
+            ('Não consegui concluir a Formação dentro de 12 meses. O que posso fazer?', 'Nós sabemos que imprevistos acontecem e que algumas pessoas podem precisar de mais do que 12 meses para concluir sua formação. Pensando nisso, nós disponibilizamos Pacotes Adicionais de Extensão de Período, com opções de 1, 3 ou 6 meses para terminar seu curso. Você pode consultar condições e solicitar a Extensão na Central de Ajuda da Plataforma Academy by Growdev.'), 
+            ('A Growdev garante emprego após a Formação?', 'Não, a Growdev não garante emprego durante ou após a formação. Por ser empresa de tecnologia e por contar com o Núcleo de Empregabilidade, alguns dos alunos podem ser selecionados e indicados para processos seletivos na própria Growdev ou em empresas parceiras, desde que cumpram os pré-requisitos solicitados pela empresa contratante e tenham apresentado bom desempenho ao longo da Formação.'),
+            ('É necessário atingir uma pontuação mínima para receber o certificado?', 'Sim, é necessário uma média mínima para recebimento dos certificados, conforme descrito em contrato.');`);
+
+            rowCountInsert = 6;
           } catch (error) {
-            this.log(`SQLJob \t-\t Erro ao inserir os dados na tabela PERGUNTAS_RESPOSTAS para nao impactar os próximos scripts - Error: ${error}`);
+            this.log(
+              `SQLJob \t-\t Erro ao inserir os dados na tabela PERGUNTAS_RESPOSTAS para nao impactar os próximos scripts - Error: ${error}`
+            );
           }
 
-          this.log(`SQLJob \t-\t Erro ao executar o segundo script - Error: ${error?.stack}`);
+          this.log(
+            `SQLJob \t-\t Erro ao executar o segundo script - Error: ${error?.stack}`
+          );
         }
         return { autoCorrectionResult, rowCountInsert };
-      }
+      };
 
       const resultSecondScript = await validSecondScript(script2.value);
       results.push(resultSecondScript.autoCorrectionResult);
 
-      const validThirdScript = async (script: string, rowCountInsert: number) => {
+      const validThirdScript = async (
+        script: string,
+        rowCountInsert: number
+      ) => {
         const autoCorrectionResult = {
-          title: 'Validação script selecionar dados PERGUNTAS_RESPOSTAS',
+          title: "Validação script selecionar dados PERGUNTAS_RESPOSTAS",
           approved: false,
         };
         try {
           const queryResult = await pgHelper.client.query(script);
 
           if (rowCountInsert === 0) {
-            autoCorrectionResult.approved = (queryResult.rowCount ?? 0) > 0
+            autoCorrectionResult.approved = (queryResult.rowCount ?? 0) > 0;
           } else {
-            autoCorrectionResult.approved = queryResult.rowCount === rowCountInsert;
+            autoCorrectionResult.approved =
+              queryResult.rowCount === rowCountInsert;
           }
-
         } catch (error) {
-          this.log(`SQLJob \t-\t Error ao validar o terceiro script - Error: ${error}`);
+          this.log(
+            `SQLJob \t-\t Error ao validar o terceiro script - Error: ${error}`
+          );
         }
         return autoCorrectionResult;
-      }
+      };
 
-      const resultThirdScript = await validThirdScript(script3.value, resultSecondScript.rowCountInsert);
+      const resultThirdScript = await validThirdScript(
+        script3.value,
+        resultSecondScript.rowCountInsert
+      );
       results.push(resultThirdScript);
-
     } catch (error) {
-      this.log(`SQLJob \t-\t Erro na correção do desafio da fase 2 - Error: ${error}`);
+      this.log(
+        `SQLJob \t-\t Erro na correção do desafio da fase 2 - Error: ${error}`
+      );
     }
 
     return results;
@@ -251,15 +273,17 @@ export class SQLJob {
 
       const validFirstScript = async (script: string) => {
         const autoCorrectionResult: AutoCorrectionResultDTO = {
-          title: 'Validação script criar tabela MENSALIDADE',
+          title: "Validação script criar tabela MENSALIDADE",
           approved: false,
-        }
+        };
         try {
           await pgHelper.client.query(script);
-          const existResult = await pgHelper.client.query(`SELECT EXISTS(SELECT 1 FROM pg_tables WHERE tablename = 'mensalidade' ) as table_exist;`)
-          autoCorrectionResult.approved = existResult.rows[0].table_exist as boolean;
+          const existResult = await pgHelper.client.query(
+            `SELECT EXISTS(SELECT 1 FROM pg_tables WHERE tablename = 'mensalidade' ) as table_exist;`
+          );
+          autoCorrectionResult.approved = existResult.rows[0]
+            .table_exist as boolean;
         } catch (error) {
-
           // Cria a tabela mensalidade para não impactar os próximos scripts
           try {
             await pgHelper.client.query(`create table mensalidade(
@@ -273,35 +297,45 @@ export class SQLJob {
               matricula_id int not null references matricula(id)
             );`);
           } catch (error) {
-            this.log(`SQLJob \t-\t Erro ao criar a tabela mensalidade para nao impactar próximos scripts - Error: ${error}`);
+            this.log(
+              `SQLJob \t-\t Erro ao criar a tabela mensalidade para nao impactar próximos scripts - Error: ${error}`
+            );
           }
 
-          this.log(`SQLJob \t-\t Erro ao executar o primeiro script - Error: ${error}`);
+          this.log(
+            `SQLJob \t-\t Erro ao executar o primeiro script - Error: ${error}`
+          );
         }
         return autoCorrectionResult;
-      }
+      };
 
       const resultFirstScript = await validFirstScript(script1.value);
       results.push(resultFirstScript);
 
       const validSecondScript = async (script: string) => {
         const autoCorrectionResult: AutoCorrectionResultDTO = {
-          title: 'Validação script inserir dados na tabela MATRICULA',
+          title: "Validação script inserir dados na tabela MATRICULA",
           approved: false,
-        }
+        };
 
         const resolveDBWithDatas = async () => {
           // deleta os dados populados no início da função e reseta o serial para 1
-          await pgHelper.client.query(`DELETE FROM matricula; ALTER SEQUENCE matricula_id_seq RESTART WITH 1;`);
+          await pgHelper.client.query(
+            `DELETE FROM matricula; ALTER SEQUENCE matricula_id_seq RESTART WITH 1;`
+          );
 
           // popula o banco com o homer e a marge
           try {
-            await pgHelper.client.query(`INSERT INTO matricula (dt_associacao,pessoa_id ) VALUES ('10/10/2018',1), ('10/10/2018',2);`);
+            await pgHelper.client.query(
+              `INSERT INTO matricula (dt_associacao,pessoa_id ) VALUES ('10/10/2018',1), ('10/10/2018',2);`
+            );
           } catch (error) {
-            this.log(`SQLJob \t-\t Erro ao inserir dados na tabela matricula antes do script 2 da fase 3 - Error: ${error}`);
+            this.log(
+              `SQLJob \t-\t Erro ao inserir dados na tabela matricula antes do script 2 da fase 3 - Error: ${error}`
+            );
             throw error;
           }
-        }
+        };
 
         const validWithList = async (queryResultList: QueryResult[]) => {
           if (queryResultList.length === 5) {
@@ -317,7 +351,7 @@ export class SQLJob {
 
             autoCorrectionResult.approved = (result as any).length === 3;
           }
-        }
+        };
 
         const validWithoutList = async (queryResult: QueryResult) => {
           // significa que o aluno criou o script já inserindo o homer e a marge
@@ -332,53 +366,61 @@ export class SQLJob {
             const result = await pgHelper.client.query(script);
             autoCorrectionResult.approved = result.rowCount === 3;
           }
-        }
+        };
 
         try {
           const queryResult = await pgHelper.client.query(script);
 
           if ((queryResult as any).length) {
-            await validWithList(queryResult as any as QueryResult[])
+            await validWithList(queryResult as any as QueryResult[]);
           } else {
-            await validWithoutList(queryResult)
+            await validWithoutList(queryResult);
           }
         } catch (error) {
-
           // Popula a tabela matricula para não impactar os outros scripts
           try {
             // deleta os dados populados no início da função e reseta o serial para 1
-            await pgHelper.client.query(`DELETE FROM matricula; ALTER SEQUENCE matricula_id_seq RESTART WITH 1;`);
+            await pgHelper.client.query(
+              `DELETE FROM matricula; ALTER SEQUENCE matricula_id_seq RESTART WITH 1;`
+            );
 
-            await pgHelper.client.query(`INSERT INTO matricula (dt_associacao,pessoa_id ) VALUES ('10/10/2018',1), ('10/10/2018',2),
+            await pgHelper.client
+              .query(`INSERT INTO matricula (dt_associacao,pessoa_id ) VALUES ('10/10/2018',1), ('10/10/2018',2),
             ('10/10/2018',3), ('10/10/2018',4), ('10/10/2018',5), ('10/10/2018',6), 
             ('10/10/2018',7), ('10/10/2018',8), ('10/10/2018',9), ('10/10/2018',10),
             ('10/10/2018',11), ('10/10/2018',12), ('10/10/2018',13);`);
           } catch (error) {
-            this.log(`SQLJob \t-\t Erro ao popular dados na tabela matricula para nao impactar próximos scripts - Error: ${error}`);
+            this.log(
+              `SQLJob \t-\t Erro ao popular dados na tabela matricula para nao impactar próximos scripts - Error: ${error}`
+            );
           }
 
-          this.log(`SQLJob \t-\t Erro ao executar o segundo script - Error: ${error}`);
+          this.log(
+            `SQLJob \t-\t Erro ao executar o segundo script - Error: ${error}`
+          );
         }
         return autoCorrectionResult;
-      }
+      };
 
       const resultSecondScript = await validSecondScript(script2.value);
       results.push(resultSecondScript);
 
       const validThirdScript = async (script: string) => {
         const autoCorrectionResult: AutoCorrectionResultDTO = {
-          title: 'Validação script inserir dados na tabela MENSALIDADE',
+          title: "Validação script inserir dados na tabela MENSALIDADE",
           approved: false,
-        }
+        };
         try {
           const queryResult = await pgHelper.client.query(script);
 
-          autoCorrectionResult.approved = ((queryResult.rowCount ?? 0) || (queryResult as any as QueryResult[]).length) > 0;
+          autoCorrectionResult.approved =
+            ((queryResult.rowCount ?? 0) ||
+              (queryResult as any as QueryResult[]).length) > 0;
         } catch (error) {
-
           // Popula a tabela mensalidade para não impactar os próximos scripts
           try {
-            await pgHelper.client.query(`insert into mensalidade(dt_vencimento,vlr_mensalidade,dt_pagamento,vlr_pago,vlr_multa,vlr_juros,matricula_id) values 
+            await pgHelper.client
+              .query(`insert into mensalidade(dt_vencimento,vlr_mensalidade,dt_pagamento,vlr_pago,vlr_multa,vlr_juros,matricula_id) values 
             ('04/04/2023','100.00','01/04/2023','100.00','0.00','0.00',1),
               ('04/05/2023','100.00','02/05/2023','100.00','0.00','0.00',1),
               ('04/06/2023','100.00','01/06/2023','100.00','0.00','0.00',1),
@@ -430,38 +472,46 @@ export class SQLJob {
               ('04/12/2023','20.00','01/12/2023','20.00','0.00','0.00',5),
               ('04/01/2024','20.00','01/01/2024','20.00','0.00','0.00',5);`);
           } catch (error) {
-            this.log(`SQLJob \t-\t Erro ao popular dados na tabela mensalidade para nao impactar próximos scripts - Error: ${error}`);
+            this.log(
+              `SQLJob \t-\t Erro ao popular dados na tabela mensalidade para nao impactar próximos scripts - Error: ${error}`
+            );
           }
 
-          this.log(`SQLJob \t-\t Erro ao inserir dados na tabela MENSALIDADE - Error: ${error}`);
+          this.log(
+            `SQLJob \t-\t Erro ao inserir dados na tabela MENSALIDADE - Error: ${error}`
+          );
         }
         return autoCorrectionResult;
-      }
+      };
 
       const resultThirdScript = await validThirdScript(script3.value);
       results.push(resultThirdScript);
 
       const validFourScript = async (script: string) => {
         const autoCorrectionResult: AutoCorrectionResultDTO = {
-          title: 'Validação script selecionar dados na tabela MENSALIDADE',
+          title: "Validação script selecionar dados na tabela MENSALIDADE",
           approved: false,
-        }
+        };
         try {
           const queryResult = await pgHelper.client.query(script);
           // 5 pessoas x 10 mensalidades para cada pessoa = 50
           autoCorrectionResult.approved = (queryResult.rowCount ?? 0) === 50;
         } catch (error) {
-          this.log(`SQLJob \t-\t Erro ao consultar os dados da tabela mensalidade - Error: ${error}`);
+          this.log(
+            `SQLJob \t-\t Erro ao consultar os dados da tabela mensalidade - Error: ${error}`
+          );
         }
         return autoCorrectionResult;
-      }
+      };
 
       const resultFourScript = await validFourScript(script4.value);
       results.push(resultFourScript);
 
       await this.clearInitialData();
     } catch (error) {
-      this.log(`SQLJob \t-\t Erro na correção desafio da fase 3 - Error: ${error}`);
+      this.log(
+        `SQLJob \t-\t Erro na correção desafio da fase 3 - Error: ${error}`
+      );
     }
 
     return results;
@@ -483,55 +533,67 @@ export class SQLJob {
 
       // popula a tabela matricula com todos os integrantes das familia simpsoms
       try {
-        await pgHelper.client.query(`INSERT INTO matricula (dt_associacao,pessoa_id ) VALUES ('10/10/2018',1), ('10/10/2018',2),
+        await pgHelper.client
+          .query(`INSERT INTO matricula (dt_associacao,pessoa_id ) VALUES ('10/10/2018',1), ('10/10/2018',2),
       ('10/10/2018',3), ('10/10/2018',4), ('10/10/2018',5);`);
       } catch (error) {
-        this.log(`SQLJob \t-\t Erro ao inserir dados na tabela matricula - Error: ${error}`);
+        this.log(
+          `SQLJob \t-\t Erro ao inserir dados na tabela matricula - Error: ${error}`
+        );
         throw error;
       }
 
       const validFirstScript = async (script: string) => {
         const autoCorrectionResult: AutoCorrectionResultDTO = {
-          title: 'Validação script inserir dados na tabela MATRICULA',
+          title: "Validação script inserir dados na tabela MATRICULA",
           approved: false,
-        }
+        };
         try {
           const queryResult = await pgHelper.client.query(script);
-          autoCorrectionResult.approved = ((queryResult.rowCount ?? 0) || (queryResult as any as QueryResult[]).length) >= 7;
+          autoCorrectionResult.approved =
+            ((queryResult.rowCount ?? 0) ||
+              (queryResult as any as QueryResult[]).length) >= 7;
         } catch (error) {
-
           // popula a tabela matricula com os registros dos integrantes da familia addams,
           // para não impactar os próximos scripts
           try {
-            await pgHelper.client.query(`INSERT INTO matricula(dt_associacao, pessoa_id) values ('2024-3-1', 6),('2024-3-1', 7),('2024-3-1', 8),('2024-3-1', 9),('2024-3-1', 10),('2024-3-1',11),('2024-3-1', 12),('2024-3-1', 13);`);
+            await pgHelper.client.query(
+              `INSERT INTO matricula(dt_associacao, pessoa_id) values ('2024-3-1', 6),('2024-3-1', 7),('2024-3-1', 8),('2024-3-1', 9),('2024-3-1', 10),('2024-3-1',11),('2024-3-1', 12),('2024-3-1', 13);`
+            );
           } catch (error) {
-            this.log(`SQLJob \t-\t Erro ao inserir dados na tabela matricula para nao impactar próximos scripts - Error: ${error}`);
+            this.log(
+              `SQLJob \t-\t Erro ao inserir dados na tabela matricula para nao impactar próximos scripts - Error: ${error}`
+            );
             throw error;
           }
 
-          this.log(`SQLJob \t-\t Erro ao executar o primeiro script - Error: ${error}`);
+          this.log(
+            `SQLJob \t-\t Erro ao executar o primeiro script - Error: ${error}`
+          );
         }
         return autoCorrectionResult;
-      }
+      };
 
       const resultFirstScript = await validFirstScript(script1.value);
       results.push(resultFirstScript);
 
       const validSecondScript = async (script: string) => {
         const autoCorrectionResult: AutoCorrectionResultDTO = {
-          title: 'Validação script inserir dados na tabela RESERVA_EQUIPAMENTO',
+          title: "Validação script inserir dados na tabela RESERVA_EQUIPAMENTO",
           approved: false,
-        }
+        };
         try {
           const queryResult = await pgHelper.client.query(script);
-          // 5 equipamentos x 12 pessoas = 60 
-          autoCorrectionResult.approved = ((queryResult.rowCount ?? 0) || (queryResult as any as QueryResult[]).length) === 60;
+          // 5 equipamentos x 12 pessoas = 60
+          autoCorrectionResult.approved =
+            ((queryResult.rowCount ?? 0) ||
+              (queryResult as any as QueryResult[]).length) === 60;
         } catch (error) {
-
           // popula a tabela reserva_equipamento com os registros de reservas,
           // para não impactar os próximos scripts
           try {
-            await pgHelper.client.query(`INSERT INTO reserva_equipamento(dt_reserva,dt_devolucao,equipamento_id,matricula_id) values
+            await pgHelper.client
+              .query(`INSERT INTO reserva_equipamento(dt_reserva,dt_devolucao,equipamento_id,matricula_id) values
             ('2023-07-01','2023-07-01',1,1),
             ('2023-07-02','2023-07-02',2,1),
             ('2023-07-03','2023-07-03',3,1),
@@ -593,59 +655,73 @@ export class SQLJob {
             ('2023-08-21','2023-08-21',4,12),
             ('2023-08-24','2023-08-24',5,12);`);
           } catch (error) {
-            this.log(`SQLJob \t-\t Erro ao inserir dados na tabela reserva_equipamento para nao impactar próximos scripts - Error: ${error}`);
+            this.log(
+              `SQLJob \t-\t Erro ao inserir dados na tabela reserva_equipamento para nao impactar próximos scripts - Error: ${error}`
+            );
           }
 
-          this.log(`SQLJob \t-\t Erro ao executar o segundo script - Error: ${error}`);
+          this.log(
+            `SQLJob \t-\t Erro ao executar o segundo script - Error: ${error}`
+          );
         }
         return autoCorrectionResult;
-      }
+      };
 
       const resultSecondScript = await validSecondScript(script2.value);
       results.push(resultSecondScript);
 
       const validThirdScript = async (script: string) => {
         const autoCorrectionResult: AutoCorrectionResultDTO = {
-          title: 'Validação script criar view VW_RESERVA_EQUIPAMENTO',
+          title: "Validação script criar view VW_RESERVA_EQUIPAMENTO",
           approved: false,
-        }
+        };
         try {
           await pgHelper.client.query(script);
-          const existResult = await pgHelper.client.query(`SELECT EXISTS(SELECT 1 FROM pg_views WHERE viewname = 'vw_reserva_associado' ) as view_exist;`)
-          autoCorrectionResult.approved = existResult.rows[0].view_exist as boolean;
+          const existResult = await pgHelper.client.query(
+            `SELECT EXISTS(SELECT 1 FROM pg_views WHERE viewname = 'vw_reserva_associado' ) as view_exist;`
+          );
+          autoCorrectionResult.approved = existResult.rows[0]
+            .view_exist as boolean;
         } catch (error) {
-          this.log(`SQLJob \t-\t Erro ao executar o terceiro script - Error: ${error}`);
+          this.log(
+            `SQLJob \t-\t Erro ao executar o terceiro script - Error: ${error}`
+          );
         }
         return autoCorrectionResult;
-      }
+      };
 
       const resultThirdScript = await validThirdScript(script3.value);
       results.push(resultThirdScript);
 
       const validFourScript = async (script: string) => {
         const autoCorrectionResult: AutoCorrectionResultDTO = {
-          title: 'Validação script selecionar dados na view VW_RESERVA_EQUIPAMENTO',
+          title:
+            "Validação script selecionar dados na view VW_RESERVA_EQUIPAMENTO",
           approved: false,
-        }
+        };
 
         if (!script) return autoCorrectionResult;
 
         try {
           const queryResult = await pgHelper.client.query(script);
-          // 5 equipamentos x 12 pessoas = 60 
+          // 5 equipamentos x 12 pessoas = 60
           autoCorrectionResult.approved = (queryResult.rowCount ?? 0) === 60;
         } catch (error) {
-          this.log(`SQLJob \t-\t Erro ao executar o quarto script - Error: ${error}`);
+          this.log(
+            `SQLJob \t-\t Erro ao executar o quarto script - Error: ${error}`
+          );
         }
         return autoCorrectionResult;
-      }
+      };
 
       const resultFourScript = await validFourScript(script4?.value);
       results.push(resultFourScript);
 
       await this.clearInitialData();
     } catch (error) {
-      this.log(`SQLJob \t-\t Erro na correção do desafio da fase 4 - Error: ${error}`);
+      this.log(
+        `SQLJob \t-\t Erro na correção do desafio da fase 4 - Error: ${error}`
+      );
     }
 
     return results;
@@ -676,19 +752,26 @@ export class SQLJob {
     }
 
     try {
-      await pgHelper.client.query(`INSERT INTO familia (id,nome) values (1,'Simpsons'), (2,'Adamms');`);
+      await pgHelper.client.query(
+        `INSERT INTO familia (id,nome) values (1,'Simpsons'), (2,'Adamms');`
+      );
     } catch (error) {
-      this.log(`SQLJob \t-\t Erro ao inserir dados na tabela familia - Error: ${error}`);
+      this.log(
+        `SQLJob \t-\t Erro ao inserir dados na tabela familia - Error: ${error}`
+      );
       throw error;
     }
 
     try {
-      await pgHelper.client.query(`INSERT INTO pessoa (id ,nome,idade,renda,familia_id ) values 
+      await pgHelper.client
+        .query(`INSERT INTO pessoa (id ,nome,idade,renda,familia_id ) values 
       (1, 'Homer', 39, 4000.00, 1), (2, 'Marge', 36, 6000.00, 1), (3, 'Bart', 12, 200.00, 1), (4, 'Lisa', 10, 0, 1), (5, 'Maggie', 1, 0, 1),
       (6, 'Gomez', 38, 8000.00, 2), (7, 'Morticia', 35, 8000.00, 2), (8, 'Wandinha', 12, 0, 2), (9, 'Feioso', 10, 0, 2), 
       (10, 'Vovó Addams', 62, 10000.00, 2), (11, 'Tio Chico', 41, 6000.00, 2), (12, 'Tropeço', 29, 3500.00, 2), (13, 'Mãozinha', 2, 200, 2);`);
     } catch (error) {
-      this.log(`SQLJob \t-\t Erro ao inserir dados na tabela pessoa - Error: ${error}`);
+      this.log(
+        `SQLJob \t-\t Erro ao inserir dados na tabela pessoa - Error: ${error}`
+      );
       throw error;
     }
 
@@ -706,7 +789,7 @@ export class SQLJob {
 
     // try {
     //   await pgHelper.client.query(`INSERT INTO matricula (dt_associacao,pessoa_id ) VALUES ('10/10/2018',1), ('10/10/2018',2),
-    //   ('10/10/2018',3), ('10/10/2018',4), ('10/10/2018',5), ('10/10/2018',6), 
+    //   ('10/10/2018',3), ('10/10/2018',4), ('10/10/2018',5), ('10/10/2018',6),
     //   ('10/10/2018',7), ('10/10/2018',8), ('10/10/2018',9), ('10/10/2018',10),
     //   ('10/10/2018',11), ('10/10/2018',12), ('10/10/2018',13);`);
     // } catch (error) {
@@ -720,15 +803,20 @@ export class SQLJob {
         descricao varchar(200) not null	
       );`);
     } catch (error) {
-      this.log(`SQLJob \t-\t Erro ao criar tabela equipamento - Error: ${error}`);
+      this.log(
+        `SQLJob \t-\t Erro ao criar tabela equipamento - Error: ${error}`
+      );
       throw error;
     }
 
     try {
-      await pgHelper.client.query(`INSERT INTO equipamento (descricao) VALUES ('Kit Volei'), ('Kit Beach Tênis'), ('Prancha'), 
+      await pgHelper.client
+        .query(`INSERT INTO equipamento (descricao) VALUES ('Kit Volei'), ('Kit Beach Tênis'), ('Prancha'), 
       ('Skate'), ('Bola de futebol');`);
     } catch (error) {
-      this.log(`SQLJob \t-\t Erro ao inserir dados na tabela equipamento - Error: ${error}`);
+      this.log(
+        `SQLJob \t-\t Erro ao inserir dados na tabela equipamento - Error: ${error}`
+      );
       throw error;
     }
 
@@ -741,7 +829,9 @@ export class SQLJob {
         equipamento_id int not null references equipamento(id) 
       );`);
     } catch (error) {
-      this.log(`SQLJob \t-\t Erro ao criar tabela reserva_equipamento - Error: ${error}`);
+      this.log(
+        `SQLJob \t-\t Erro ao criar tabela reserva_equipamento - Error: ${error}`
+      );
       throw error;
     }
   }
@@ -749,26 +839,34 @@ export class SQLJob {
   private async clearInitialData(): Promise<void> {
     try {
       // remove view criada como table
-      const tableViewNames = (await pgHelper.client.query(`SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename ilike 'vw%';`)).rows;
+      const tableViewNames = (
+        await pgHelper.client.query(
+          `SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename ilike 'vw%';`
+        )
+      ).rows;
 
       if (tableViewNames.length) {
         const tableViews = tableViewNames
           .map(({ tablename }) => `"public"."${tablename}"`)
-          .join(', ');
+          .join(", ");
 
         const queryDropTableViews = `DROP TABLE IF EXISTS ${tableViews};`;
-        console.log(queryDropTableViews)
+        console.log(queryDropTableViews);
 
         await pgHelper.client.query(queryDropTableViews);
       }
 
       // remove as views
-      const viewsNames = (await pgHelper.client.query(`SELECT viewname FROM pg_views WHERE schemaname='public' and viewname not ilike 'pg%';`)).rows;
+      const viewsNames = (
+        await pgHelper.client.query(
+          `SELECT viewname FROM pg_views WHERE schemaname='public' and viewname not ilike 'pg%';`
+        )
+      ).rows;
 
       if (viewsNames.length) {
         const views = viewsNames
           .map(({ viewname }) => `"public"."${viewname}"`)
-          .join(', ');
+          .join(", ");
 
         const queryDropViews = `DROP VIEW IF EXISTS ${views};`;
 
@@ -779,18 +877,21 @@ export class SQLJob {
     }
 
     try {
-      const tableNames = (await pgHelper.client.query(`SELECT tablename FROM pg_tables WHERE schemaname='public'`)).rows;
+      const tableNames = (
+        await pgHelper.client.query(
+          `SELECT tablename FROM pg_tables WHERE schemaname='public'`
+        )
+      ).rows;
 
       if (tableNames.length) {
         const tables = tableNames
           .map(({ tablename }) => `"public"."${tablename}"`)
-          .join(', ');
+          .join(", ");
 
         const queryDropTables = `DROP TABLE IF EXISTS ${tables};`;
 
         await pgHelper.client.query(queryDropTables);
       }
-
     } catch (error) {
       this.log(`SQLJob \t-\t Erro ao limpar as tables - Error: ${error}`);
     }
@@ -846,12 +947,14 @@ export class SQLJob {
 
   private getNowFormatted() {
     const now = new Date();
-    return `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}-${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`
+    return `${now.getDate()}-${
+      now.getMonth() + 1
+    }-${now.getFullYear()}-${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
   }
 
   private startLog() {
     const fileName = `${this.getNowFormatted()}-sql-log.txt`;
-    const dirPath = path.join(__dirname, 'logs', 'sql');
+    const dirPath = path.join(__dirname, "logs", "sql");
     if (!fs.existsSync(dirPath)) {
       fs.mkdirSync(dirPath, { recursive: true });
     }
@@ -867,6 +970,6 @@ export class SQLJob {
       const text = `${this.getNowFormatted()} \t - \t ${message} \n`;
       // console.log(text);
       this.writeStream?.write(text);
-    } catch (_) { }
+    } catch (_) {}
   }
 }
